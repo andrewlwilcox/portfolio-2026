@@ -1,0 +1,6 @@
+{
+  "name": "Andrew L. Wilcox Portfolio",
+  "description": "A dynamic replication of Andrew L. Wilcox's personal portfolio featuring seamless background transitions, smart menu scrolls, and hover elements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
