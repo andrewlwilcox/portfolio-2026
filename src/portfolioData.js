@@ -1,7 +1,7 @@
 export const portfolioData = {
   global: {
     name: "ANDREW WILCOX",
-    title: "DESIGN & TECHNOLOGY DIRECTOR",
+    title: "CREATIVE DIRECTOR",
     email: "andrewlwilcox@gmail.com",
     socials: {
       linkedin: "https://linkedin.com/in/yourprofile",
@@ -12,11 +12,11 @@ export const portfolioData = {
 
   hero: {
     headline: "Andrew Wilcox, Creative Director",
-    subheadline: "A creative leader with 20 years in tech. My sweet spot is turning dense, complicated product hurdles into simple, human stories. I partner with builders— putting the same energy and passion into building a brand as they do in building a product."
+    subheadline: "A senior creative leader with a life-long affinity for gadgets and tech. My sweet spot is turning dense, complicated product hurdles into simple, human stories. I partner with builders— putting the same energy and passion into building a brand narrative as they do in building a product."
   },
 
   about: {
-    philosophyHeadline: "ELEVATED BY THE COMPANY I KEEP.",
+    philosophyHeadline: "Grateful for the company I keep.",
     biography: "Two decades in this industry have taught me that a great portfolio is really just a reflection of the incredible teams, clients, and partners I've been lucky enough to collaborate with."
   },
 
