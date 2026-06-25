@@ -53,6 +53,72 @@ export default function App() {
     setSelectedCaseStudyImageIndex(null);
   }, [selectedCaseStudy]);
 
+  const isPopStateRef = useRef(false);
+
+  // Close helper
+  const closeCaseStudy = () => {
+    if (window.history.state?.projectDetailOpen === true && !isPopStateRef.current) {
+      window.history.back();
+    }
+    isPopStateRef.current = false;
+    setSelectedCaseStudy(null);
+  };
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (selectedCaseStudy) {
+        isPopStateRef.current = true;
+        setSelectedCaseStudy(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [selectedCaseStudy]);
+
+  useEffect(() => {
+    if (selectedCaseStudy) {
+      if (window.history.state?.projectDetailOpen !== true) {
+        window.history.pushState({ projectDetailOpen: true }, '', '');
+      }
+    }
+  }, [selectedCaseStudy]);
+
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleModalTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
+    }
+  };
+
+  const handleModalTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || e.changedTouches.length !== 1) return;
+    
+    const startX = touchStartRef.current.x;
+    const startY = touchStartRef.current.y;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+    
+    // Check for mostly horizontal swipe
+    if (Math.abs(diffY) < 60) {
+      // Swipe left: finger moves right-to-left (diffX < -60)
+      // Swipe right: finger moves left-to-right (diffX > 60)
+      if (Math.abs(diffX) > 60) {
+        closeCaseStudy();
+      }
+    }
+    
+    touchStartRef.current = null;
+  };
+
   // Mobile viewport and vertical center-stage project tracking
   const [activeCenterStageRowId, setActiveCenterStageRowId] = useState<string | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -557,7 +623,7 @@ export default function App() {
             {[
               { id: 'work', label: 'Work' },
               { id: 'side-projects', label: 'Side Work' },
-              { id: 'connect', label: 'Connect' }
+              { id: 'connect', label: 'Experience' }
             ].map((section) => (
               <a
                 key={section.id}
@@ -667,7 +733,7 @@ export default function App() {
             {[
               { id: 'work', label: 'Work' },
               { id: 'side-projects', label: 'Side Work' },
-              { id: 'connect', label: 'Connect' }
+              { id: 'connect', label: 'Experience' }
             ].map((section) => (
               <a
                 key={section.id}
@@ -1050,6 +1116,8 @@ export default function App() {
             exit={{ opacity: 0 }}
             onScroll={(e) => setModalScrollY(e.currentTarget.scrollTop)}
             onClick={() => setSelectedCaseStudyImageIndex(null)}
+            onTouchStart={handleModalTouchStart}
+            onTouchEnd={handleModalTouchEnd}
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl overflow-y-auto"
           >
             {/* Minimalist, absolute "Close" [X] button top right that glides smoothly */}
@@ -1059,7 +1127,7 @@ export default function App() {
               className="absolute top-6 right-6 z-[60]"
             >
               <button 
-                onClick={() => setSelectedCaseStudy(null)}
+                onClick={closeCaseStudy}
                 className="p-3 text-stone-300 hover:text-white rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-110 focus:outline-none shadow-lg backdrop-blur-sm"
                 title="Close overlay"
               >
