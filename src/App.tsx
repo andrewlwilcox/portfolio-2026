@@ -19,7 +19,15 @@ import { Project } from './types';
 import MagneticText from './components/MagneticText';
 import MagneticImage3D from './components/MagneticImage3D';
 import ProjectRow from './components/ProjectRow';
+import { SplitFlapCountdown } from './components/SplitFlapCountdown';
 import { motion, AnimatePresence } from 'motion/react';
+
+const AVAILABILITY_DATE = "2026-09-02T09:00:00";
+
+const formatAvailabilityDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `${date.getDate()} ${date.toLocaleString('en-US', { month: 'short' }).toUpperCase()}`;
+};
 
 export default function App() {
   // Navigation & Scroll states
@@ -615,108 +623,103 @@ export default function App() {
       >
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           
-          {/* Left spacer to maintain layout alignment without showing name and subheadline */}
-          <div className="w-10 md:w-32" />
-
-          {/* Desktop Links */}
-          <nav className="hidden md:flex items-center space-x-12 font-mono text-xs uppercase tracking-[0.18em]">
-            {[
-              { id: 'work', label: 'Work' },
-              { id: 'side-projects', label: 'Side Work' },
-              { id: 'connect', label: 'Experience' }
-            ].map((section) => (
-              <a
-                key={section.id}
-                href={`#${section.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' });
-                  setActiveSection(section.id);
-                  if (section.id !== 'work' && section.id !== 'side-projects') {
-                    setActiveBgColor('#0a0a0c');
-                    setHoveredProject(null);
-                    setIsHovering(false);
-                  }
-                }}
-                className={`relative py-1.5 transition-all duration-300 group ${
-                  activeSection === section.id 
-                    ? 'opacity-100 font-semibold' 
-                    : 'opacity-50 hover:opacity-100'
-                }`}
+          {/* Top-Left: "Let's Talk" button (Desktop only, else spacer) */}
+          <div className="w-10 md:w-auto flex items-center">
+            <div className="hidden md:flex items-center">
+              <motion.button 
+                onClick={copyMailAddress}
+                whileHover="hover"
+                initial="initial"
+                className="px-3 py-1.5 rounded-full border border-current font-mono text-[0.62rem] tracking-wider uppercase opacity-80 hover:opacity-100 hover:scale-[1.03] transition-all flex items-center space-x-1.5 focus:outline-none relative"
               >
-                <span>{section.label}</span>
-                <span className={`absolute bottom-0 left-0 w-full h-[1px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
-                  isLightActive ? 'bg-black' : 'bg-white'
-                } ${activeSection === section.id ? 'scale-x-100' : ''}`} />
-              </a>
-            ))}
-          </nav>
-
-          {/* Utility Contact Badge */}
-          <div className="hidden md:flex items-center">
-            <motion.button 
-              onClick={copyMailAddress}
-              whileHover="hover"
-              initial="initial"
-              className="px-3 py-1.5 rounded-full border border-current font-mono text-[0.62rem] tracking-wider uppercase opacity-80 hover:opacity-100 hover:scale-[1.03] transition-all flex items-center space-x-1.5 focus:outline-none relative"
-            >
-              {copiedEmail ? (
-                <>
-                  <Check className="w-3 h-3 text-emerald-500 animate-pulse" />
-                  <span className="text-emerald-500 font-bold">EMAIL COPIED!</span>
-                </>
-              ) : (
-                <>
-                  <motion.span 
-                    variants={{
-                      initial: { y: 0, scale: 1, rotate: 0 },
-                      hover: { 
-                        y: -14, 
-                        scale: 1.25, 
-                        rotate: 20,
-                        transition: { 
-                          type: "spring", 
-                          stiffness: 260, 
-                          damping: 15,
-                          mass: 0.8
-                        } 
-                      }
-                    }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 15
-                    }}
-                    className="inline-flex items-center justify-center relative z-10"
-                  >
-                    <svg 
-                      viewBox="0 0 24 24" 
-                      style={{ width: '14.4px', height: '14.4px' }}
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
+                {copiedEmail ? (
+                  <>
+                    <Check className="w-3 h-3 text-emerald-500 animate-pulse" />
+                    <span className="text-emerald-500 font-bold">EMAIL COPIED!</span>
+                  </>
+                ) : (
+                  <>
+                    <motion.span 
+                      variants={{
+                        initial: { y: 0, scale: 1, rotate: 0 },
+                        hover: { 
+                          y: -14, 
+                          scale: 1.25, 
+                          rotate: 20,
+                          transition: { 
+                            type: "spring", 
+                            stiffness: 260, 
+                            damping: 15,
+                            mass: 0.8
+                          } 
+                        }
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 15
+                      }}
+                      className="inline-flex items-center justify-center relative z-10"
                     >
-                      {/* Backing solid rectangle to cover button outline when breaking out */}
-                      <rect x="2" y="4" width="20" height="16" rx="2" fill={activeBgColor} stroke="currentColor" strokeWidth="2" />
-                      {/* Fold lines without fill so V-flap remains visible */}
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" strokeWidth="2" />
-                    </svg>
-                  </motion.span>
-                  <span>LET'S TALK</span>
-                </>
-              )}
-            </motion.button>
+                      <svg 
+                        viewBox="0 0 24 24" 
+                        style={{ width: '14.4px', height: '14.4px' }}
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        {/* Backing solid rectangle to cover button outline when breaking out */}
+                        <rect x="2" y="4" width="20" height="16" rx="2" fill={activeBgColor} stroke="currentColor" strokeWidth="2" />
+                        {/* Fold lines without fill so V-flap remains visible */}
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    </motion.span>
+                    <span>LET'S TALK</span>
+                  </>
+                )}
+              </motion.button>
+            </div>
           </div>
 
-          {/* Mobile hamburger Toggle */}
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 opacity-80 hover:opacity-100 transition-opacity focus:outline-none"
-            aria-label="Toggle mobile menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Top-Right Area: Split-Flap for Desktop (Hidden entirely on mobile screens), mobile-only "Let's Talk" button */}
+          <div className="flex items-center space-x-4">
+            {/* Grouped dynamic text and SplitFlapCountdown (Desktop only) */}
+            <div className="hidden md:flex items-center justify-end gap-2 md:gap-3">
+              <div className="text-right font-mono text-xs tracking-widest text-neutral-400 uppercase leading-normal select-none">
+                AVAILABLE FOR NEW PROJECTS ON <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
+              </div>
+              <SplitFlapCountdown availabilityDateTime={AVAILABILITY_DATE} />
+            </div>
+
+            {/* Let's Talk button (Mobile only) */}
+            <div className="md:hidden flex items-center">
+              <motion.button 
+                onClick={copyMailAddress}
+                className="px-2.5 py-1 rounded-full border border-current font-mono text-[0.55rem] tracking-wider uppercase opacity-80 hover:opacity-100 transition-all flex items-center space-x-1 focus:outline-none relative"
+              >
+                {copiedEmail ? (
+                  <>
+                    <Check className="w-2.5 h-2.5 text-emerald-500 animate-pulse" />
+                    <span className="text-emerald-500 font-bold">COPIED!</span>
+                  </>
+                ) : (
+                  <>
+                    <span>LET'S TALK</span>
+                  </>
+                )}
+              </motion.button>
+            </div>
+
+            {/* Mobile hamburger Toggle */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 opacity-80 hover:opacity-100 transition-opacity focus:outline-none"
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation Drawer */}
@@ -813,7 +816,7 @@ export default function App() {
         >
           <div className="max-w-4xl">
             <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40 block mb-8">
-              / INTRODUCTION /
+              / HELLO /
             </span>
             
             <h1 className="font-young text-[9.8vw] md:text-8xl font-normal tracking-tight leading-[1.05] normal-case">
@@ -904,7 +907,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-16 gap-4">
             <div>
               <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40">
-                / SIDE ARCHIVES — PROJECTS /
+                / EXTRA /
               </span>
               <h2 className="text-xl md:text-2xl font-bold tracking-tight uppercase mt-1">
                 Side Work
@@ -912,7 +915,7 @@ export default function App() {
             </div>
             
             <p className="text-xs font-mono max-w-xs opacity-50 uppercase tracking-widest leading-relaxed">
-              experimental side projects and creative explorations.
+              *experimental side projects and creative explorations.
             </p>
           </div>
 
@@ -973,7 +976,7 @@ export default function App() {
               {/* Header */}
               <div className="space-y-4">
                 <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40">
-                  / MY EXPERIENCE /
+                  / EXPERIENCE /
                 </span>
                 <h2 className="font-young text-2xl md:text-4xl font-normal tracking-tight normal-case leading-tight mt-1">
                   {portfolioData.about.philosophyHeadline}
@@ -1322,7 +1325,7 @@ export default function App() {
           MODERN MINIMAL HUMBLE FOOTER
           ------------------------------------------------------------------------- */}
       <footer 
-        className="max-w-6xl mx-auto px-6 py-12 border-t flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-widest text-stone-500 mt-16"
+        className="max-w-6xl mx-auto px-6 py-12 border-t flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-[0.62rem] uppercase tracking-widest text-stone-500 mt-16"
         style={{ 
           borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'
         }}
@@ -1333,6 +1336,9 @@ export default function App() {
           </span>
           <span className="opacity-40">—</span>
           <span>&copy; {new Date().getFullYear()}</span>
+        </div>
+        <div className="text-left md:text-right leading-relaxed">
+          IF YOU'RE READING THIS I APPRECIATE YOUR ATTENTION TO DETAIL. WE SHOULD WORK TOGETHER.
         </div>
       </footer>
 
