@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        font-family: YoungSerif-Regular, 'Young Serif';
+        font-size: 172.52px;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" width="180" height="180"/>
+  <g id="Layer_1" data-name="Layer 1">
+    <text class="cls-2" transform="translate(22.36 147.95)"><tspan x="0" y="0">A</tspan></text>
+  </g>
+</svg>

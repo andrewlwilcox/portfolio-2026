@@ -26,7 +26,20 @@ const AVAILABILITY_DATE = "2026-09-02T09:00:00";
 
 const formatAvailabilityDate = (dateString: string) => {
   const date = new Date(dateString);
-  return `${date.getDate()} ${date.toLocaleString('en-US', { month: 'short' }).toUpperCase()}`;
+  const day = date.getDate();
+  const month = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+
+  const getOrdinalSuffix = (n: number) => {
+    if (n >= 11 && n <= 13) return 'TH';
+    switch (n % 10) {
+      case 1: return 'ST';
+      case 2: return 'ND';
+      case 3: return 'RD';
+      default: return 'TH';
+    }
+  };
+
+  return `${month} ${day}${getOrdinalSuffix(day)}`;
 };
 
 export default function App() {
@@ -623,8 +636,9 @@ export default function App() {
       >
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           
-          {/* Top-Left: "Let's Talk" button (Desktop only, else spacer) */}
-          <div className="w-10 md:w-auto flex items-center">
+          {/* Top-Left: "Let's Talk" button (Desktop & Mobile left-aligned) */}
+          <div className="flex items-center">
+            {/* Desktop Let's Talk button */}
             <div className="hidden md:flex items-center">
               <motion.button 
                 onClick={copyMailAddress}
@@ -680,19 +694,8 @@ export default function App() {
                 )}
               </motion.button>
             </div>
-          </div>
 
-          {/* Top-Right Area: Split-Flap for Desktop (Hidden entirely on mobile screens), mobile-only "Let's Talk" button */}
-          <div className="flex items-center space-x-4">
-            {/* Grouped dynamic text and SplitFlapCountdown (Desktop only) */}
-            <div className="hidden md:flex items-center justify-end gap-2 md:gap-3">
-              <div className="text-right font-mono text-xs tracking-widest text-neutral-400 uppercase leading-normal select-none">
-                AVAILABLE FOR NEW PROJECTS ON <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
-              </div>
-              <SplitFlapCountdown availabilityDateTime={AVAILABILITY_DATE} />
-            </div>
-
-            {/* Let's Talk button (Mobile only) */}
+            {/* Mobile Let's Talk button (Left aligned) */}
             <div className="md:hidden flex items-center">
               <motion.button 
                 onClick={copyMailAddress}
@@ -709,6 +712,17 @@ export default function App() {
                   </>
                 )}
               </motion.button>
+            </div>
+          </div>
+
+          {/* Top-Right Area: Split-Flap for Desktop, Hamburger for Mobile */}
+          <div className="flex items-center justify-end">
+            {/* Grouped dynamic text and SplitFlapCountdown (Desktop only) */}
+            <div className="hidden md:flex items-center justify-end gap-2 md:gap-3">
+              <div className="text-right font-mono text-xs tracking-widest text-neutral-400 uppercase leading-normal select-none">
+                AVAILABLE FOR NEW PROJECTS ON <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
+              </div>
+              <SplitFlapCountdown availabilityDateTime={AVAILABILITY_DATE} />
             </div>
 
             {/* Mobile hamburger Toggle */}

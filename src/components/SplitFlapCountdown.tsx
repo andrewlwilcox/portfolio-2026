@@ -102,8 +102,8 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
         )}
       </div>
 
-      {/* Label - absolutely positioned below to avoid structural alignment skew */}
-      <span className="absolute top-full mt-1.5 font-mono text-xs tracking-widest text-neutral-400 uppercase select-none leading-none whitespace-nowrap">
+      {/* Label - absolutely positioned below to avoid structural alignment skew, perfectly centered */}
+      <span className="absolute top-full left-0 right-0 mt-1.5 w-full text-center font-mono text-xs tracking-widest text-neutral-400 uppercase select-none leading-none whitespace-nowrap">
         {label}
       </span>
     </div>
