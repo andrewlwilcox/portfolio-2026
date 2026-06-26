@@ -125,7 +125,7 @@ export const portfolioData = {
       "strategy_line": "Life's a blur. Your memories don't have to be.",
       "overview": "Apple's iPhone has long dominated the smartphone landscape, but Google Pixel was gaining ground rapidly thanks to a suite of cutting edge photo tools available exclusively on Pixel phones— from the magic eraser, to Real Tone, to the Unblur feature. The ask was to promote the unblur feature in a way that would resonate on a human level. It's technically amazing that Google can restore detail to images that wasn't there, but we knew the audience would care about 'how' we did it. They needed to understand 'why' we did it. The real benefit of the unblur feature was in the preservation of your best memories... the ones that your capture on the move. Those are the real moments in between the moments.",
       "video_caption": "After we'd aligned on our concept, the next step was to collect thousands of photos. They needed to feel candid and real, not staged. We pulled some from the internet, but many came from our team.",
-      "results": "This edit was a lot of fun. Working with a beautiful track, and establishing a complementary cadence of still images became such a powerful way to tell a broader story.",
+      "results": "This is a spec film we made that did not run, but we enjoyed both producing it and getting lots of affirmation from senior Google leadership. It didn't run because a different internal team had already contracted an agency to produce and run a competing film at the same time.",
       "videos": ["https://player.vimeo.com/video/904573968"],
       "gallery_images": [
         "https://raw.githubusercontent.com/andrewlwilcox/creative-portfolio-assets/main/Google-unblur-image-01.jpeg",
@@ -195,7 +195,7 @@ export const portfolioData = {
       "strategy_line": "Show college students that Alexa can fit seamlessly into their lives.",
       "overview": "In 2019 Alexa was wildly popular with all demographics except one— the elusive college student demo. We wanted to prove to college students that Alexa could be just as helpful to them as it is to their parents. 17MM of the 19MM college students in the US are on Snapchat, so we decided to create a campaign that met them where they were. We created a (fake) Snapchat series that fit seamlessly into the Snap content they already loved on the platform.",
       "video_caption": "Alexa Cove was a Snapchat show that we didn’t really make (or did we?) featuring Amazon Alexa as one of five college roommates living in a house together. Comprised of quick 10-second episodes, we named the show 'Alexa Cove.'",
-      "results": "To be written.",
+      "results": "We saw a 12% boost in sales of Echo devices to the college-age demo in the 2 months leading up that year's college school year.",
       "videos": ["https://player.vimeo.com/video/531911843", "https://player.vimeo.com/video/531913076"],
       "gallery_images": [
         "https://raw.githubusercontent.com/andrewlwilcox/creative-portfolio-assets/main/Amazon-alexa-cove-image-01.jpeg",

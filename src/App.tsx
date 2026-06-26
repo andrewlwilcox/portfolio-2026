@@ -226,10 +226,10 @@ export default function App() {
     'motorola-e',
     'meta',
     'amazon-alexa',
-    'nike-china',
     'arconic',
     'motorola-x',
-    'amazon-halo'
+    'amazon-halo',
+    'nike-china'
   ];
 
   const sideProjectIds = [
@@ -644,7 +644,7 @@ export default function App() {
                 onClick={copyMailAddress}
                 whileHover="hover"
                 initial="initial"
-                className="px-3 py-1.5 rounded-full border border-current font-mono text-[0.62rem] tracking-wider uppercase opacity-80 hover:opacity-100 hover:scale-[1.03] transition-all flex items-center space-x-1.5 focus:outline-none relative"
+                className="px-3 py-1.5 rounded-full border border-current font-mono text-xs tracking-wider uppercase opacity-80 hover:opacity-100 hover:scale-[1.03] transition-all flex items-center space-x-1.5 focus:outline-none relative"
               >
                 {copiedEmail ? (
                   <>
@@ -928,7 +928,7 @@ export default function App() {
               </h2>
             </div>
             
-            <p className="text-xs font-mono max-w-xs opacity-50 uppercase tracking-widest leading-relaxed">
+            <p className="text-xs font-mono max-w-xs opacity-50 uppercase tracking-widest leading-relaxed text-right md:text-right">
               *experimental side projects and creative explorations.
             </p>
           </div>
@@ -1164,12 +1164,6 @@ export default function App() {
                   >
                     {selectedCaseStudy.category}
                   </span>
-                  <span className="font-mono text-[0.62rem] text-stone-500 uppercase tracking-widest">
-                    / ID: {selectedCaseStudy.id.toUpperCase()}
-                  </span>
-                  <span className="font-mono text-[0.62rem] text-stone-500 uppercase tracking-widest">
-                    / YEAR: {selectedCaseStudy.year}
-                  </span>
                 </div>
 
                 <h2 className="text-4xl md:text-7xl font-normal font-young text-white tracking-tight leading-none">
@@ -1205,7 +1199,7 @@ export default function App() {
                       className="font-mono text-[0.65rem] tracking-[0.2em] uppercase font-bold"
                       style={{ color: selectedCaseStudy.hoverBgColor }}
                     >
-                      THE SPECIFICATION &amp; INSIGHT
+                      THE OBJECTIVE
                     </h4>
                     <p className="font-mono text-stone-200 text-xs uppercase tracking-[0.18em] leading-relaxed opacity-70 text-left">
                       {selectedCaseStudy.overview}
@@ -1219,7 +1213,7 @@ export default function App() {
                     <div className="flex items-center space-x-3 pb-2 border-b border-white/5">
                       <span className="h-[1px] w-8 bg-white/20"></span>
                       <h4 className="font-mono text-stone-400 text-[0.65rem] tracking-[0.25em] uppercase font-bold">
-                        PRIMARY DOCUMENTATION FILM
+                        MAIN FILM
                       </h4>
                     </div>
 
@@ -1260,7 +1254,7 @@ export default function App() {
                       className="font-mono text-[0.65rem] tracking-[0.2em] uppercase font-bold"
                       style={{ color: selectedCaseStudy.hoverBgColor }}
                     >
-                      RESULTS &amp; OUTCOMES
+                      OUTCOMES
                     </h4>
                     <p className="font-mono text-stone-300 text-xs md:text-xs uppercase tracking-[0.18em] leading-relaxed opacity-70 text-left">
                       {selectedCaseStudy.results}
@@ -1274,7 +1268,7 @@ export default function App() {
                     <div className="flex items-center space-x-3 pb-2 border-b border-white/5">
                       <span className="h-[1px] w-8 bg-white/20"></span>
                       <h4 className="font-mono text-stone-400 text-[0.65rem] tracking-[0.25em] uppercase font-bold">
-                        ADDITIONAL ARCHIVE DOCUMENTATION
+                        ADDITIONAL VIDEO
                       </h4>
                     </div>
                     <div className="flex flex-col gap-y-12">
@@ -1306,7 +1300,7 @@ export default function App() {
                     <div className="flex items-center space-x-3 pb-4 border-b border-white/5">
                       <span className="h-[1px] w-8 bg-white/20"></span>
                       <h4 className="font-mono text-stone-400 text-[0.65rem] tracking-[0.25em] uppercase font-bold">
-                        IMMERSIVE DESIGN &amp; BRAND SCENOGRAPHY
+                        CAMPAIGN IMAGERY
                       </h4>
                     </div>
 

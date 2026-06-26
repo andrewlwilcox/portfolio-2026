@@ -1,20 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #231f20;
-      }
-
-      .cls-2 {
-        fill: #fff;
-        font-family: YoungSerif-Regular, 'Young Serif';
-        font-size: 172.52px;
-      }
-    </style>
-  </defs>
-  <rect class="cls-1" width="180" height="180"/>
-  <g id="Layer_1" data-name="Layer 1">
-    <text class="cls-2" transform="translate(22.36 147.95)"><tspan x="0" y="0">A</tspan></text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <rect width="512" height="512" rx="112" fill="#0c0d0f"/>
+  <path d="M140 360 L210 160 L256 290 L302 160 L372 360" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M175 260 H337" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
