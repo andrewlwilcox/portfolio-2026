@@ -1195,13 +1195,10 @@ export default function App() {
                 {/* 3. Project Description: Directly underneath the hero image block */}
                 {selectedCaseStudy.overview && (
                   <div className="text-left max-w-4xl space-y-4">
-                    <h4 
-                      className="font-mono text-[0.65rem] tracking-[0.2em] uppercase font-bold"
-                      style={{ color: selectedCaseStudy.hoverBgColor }}
-                    >
+                    <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                       THE OBJECTIVE
                     </h4>
-                    <p className="font-mono text-stone-200 text-xs uppercase tracking-[0.18em] leading-relaxed opacity-70 text-left">
+                    <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-70 md:transition-colors md:duration-300 cursor-default md:hover:text-white md:hover:opacity-100">
                       {selectedCaseStudy.overview}
                     </p>
                   </div>
@@ -1212,7 +1209,7 @@ export default function App() {
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3 pb-2 border-b border-white/5">
                       <span className="h-[1px] w-8 bg-white/20"></span>
-                      <h4 className="font-mono text-stone-400 text-[0.65rem] tracking-[0.25em] uppercase font-bold">
+                      <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                         MAIN FILM
                       </h4>
                     </div>
@@ -1224,17 +1221,17 @@ export default function App() {
                         <div className="space-y-3">
                           <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl">
                             <iframe
-                              src={embedUrl}
-                              className="absolute inset-0 w-full h-full border-0"
-                              allow="autoplay; fullscreen; picture-in-picture"
-                              allowFullScreen
-                              title={`${selectedCaseStudy.title} Primary Video`}
+                               src={embedUrl}
+                               className="absolute inset-0 w-full h-full border-0"
+                               allow="autoplay; fullscreen; picture-in-picture"
+                               allowFullScreen
+                               title={`${selectedCaseStudy.title} Primary Video`}
                             />
                           </div>
 
                           {/* 5. NEW: video_caption text directly below primary video */}
                           {selectedCaseStudy.video_caption && (
-                            <p className="font-mono text-xs text-stone-400 opacity-60 tracking-wider text-left leading-relaxed">
+                            <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-70 md:transition-colors md:duration-300 cursor-default md:hover:text-white md:hover:opacity-100">
                               {selectedCaseStudy.video_caption}
                             </p>
                           )}
@@ -1250,13 +1247,10 @@ export default function App() {
                     className="border-l-2 pl-6 py-2 max-w-4xl space-y-4"
                     style={{ borderColor: selectedCaseStudy.hoverBgColor }}
                   >
-                    <h4 
-                      className="font-mono text-[0.65rem] tracking-[0.2em] uppercase font-bold"
-                      style={{ color: selectedCaseStudy.hoverBgColor }}
-                    >
+                    <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                       OUTCOMES
                     </h4>
-                    <p className="font-mono text-stone-300 text-xs md:text-xs uppercase tracking-[0.18em] leading-relaxed opacity-70 text-left">
+                    <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-70 md:transition-colors md:duration-300 cursor-default md:hover:text-white md:hover:opacity-100">
                       {selectedCaseStudy.results}
                     </p>
                   </div>
@@ -1267,7 +1261,7 @@ export default function App() {
                   <div className="space-y-12">
                     <div className="flex items-center space-x-3 pb-2 border-b border-white/5">
                       <span className="h-[1px] w-8 bg-white/20"></span>
-                      <h4 className="font-mono text-stone-400 text-[0.65rem] tracking-[0.25em] uppercase font-bold">
+                      <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                         ADDITIONAL VIDEO
                       </h4>
                     </div>
@@ -1299,7 +1293,7 @@ export default function App() {
                   <div className="space-y-12">
                     <div className="flex items-center space-x-3 pb-4 border-b border-white/5">
                       <span className="h-[1px] w-8 bg-white/20"></span>
-                      <h4 className="font-mono text-stone-400 text-[0.65rem] tracking-[0.25em] uppercase font-bold">
+                      <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                         CAMPAIGN IMAGERY
                       </h4>
                     </div>
