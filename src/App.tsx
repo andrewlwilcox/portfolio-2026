@@ -720,7 +720,7 @@ export default function App() {
             {/* Grouped dynamic text and SplitFlapCountdown (Desktop only) */}
             <div className="hidden md:flex items-center justify-end gap-2 md:gap-3">
               <div className="text-right font-mono text-xs tracking-widest text-neutral-400 uppercase leading-normal select-none">
-                AVAILABLE FOR NEW PROJECTS ON <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
+                AVAILABLE FOR NEW PROJECTS STARTING <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
               </div>
               <SplitFlapCountdown availabilityDateTime={AVAILABILITY_DATE} />
             </div>

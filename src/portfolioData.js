@@ -12,7 +12,7 @@ export const portfolioData = {
 
   hero: {
     headline: "Andrew Wilcox, Creative Director",
-    subheadline: "A senior Art Director, I’ve had a life-long obsession for gadgets and tech. My favorite thing is getting millions of people to be as excited about new gadgets and new technology as I am. I partner with builders— putting the same energy and passion into building a product story as they do in building a product."
+    subheadline: "I have a borderline unhealthy obsession with new technology and gadgets. This is my dream job— getting millions of people as excited about new technologies as I am. I partner with builders— putting the same energy and dedication into building new product stories as they do in building new products."
   },
 
   about: {
