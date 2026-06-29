@@ -283,7 +283,7 @@ export default function App() {
       return selectedCaseStudy.strategy_line;
     }
     const strategyLines: Record<string, string> = {
-      openai: "Show what the first 10 years at OpenAI felt like.",
+      openai: "Show what OpenAI’s first 10 years actually felt like.",
       "google-safer": "Google Security: online safety top of mind, all the time.",
       google: "Google Security: online safety top of mind, all the time.",
       "google-security": "Google Security: online safety top of mind, all the time.",

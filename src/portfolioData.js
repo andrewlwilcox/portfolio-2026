@@ -12,12 +12,12 @@ export const portfolioData = {
 
   hero: {
     headline: "Andrew Wilcox, Creative Director",
-    subheadline: "A senior creative leader with a life-long affinity for gadgets and tech. My sweet spot is turning dense, complicated product hurdles into simple, human stories. I partner with builders— putting the same energy and passion into building a brand narrative as they do in building a product."
+    subheadline: "A senior Art Director, I’ve had a life-long obsession for gadgets and tech. My favorite thing is getting millions of people to be as excited about new gadgets and new technology as I am. I partner with builders— putting the same energy and passion into building a product story as they do in building a product."
   },
 
   about: {
     philosophyHeadline: "Grateful for the company I keep.",
-    biography: "Two decades in this industry have taught me that a great portfolio is really just a reflection of the incredible teams, clients, and partners I've been lucky enough to collaborate with."
+    biography: "If I’ve learned anything from my two decades working in the industry it’s that I’m only as good as the people I've been fortunate enough to work with."
   },
 
   projects: [
@@ -25,7 +25,7 @@ export const portfolioData = {
       "id": "openai",
       "client": "OpenAI",
       "title": "OpenAI",
-      "strategy_line": "Show what the first 10 years at OpenAI felt like.",
+      "strategy_line": "Show what OpenAI’s first 10 years actually felt like.",
       "overview": "December 15th 2025 marked 10 years since the founding of Open AI. Seven days earlier, on Monday December 8th we were briefed to make a video celebrating that milestone. In true sprint fashion we poured over archive footage and photos, and blog posts and twitter posts and white pages to rapidly construct and edit together an honest narrative. The result was a humble and candid snapshot of what the first 10 years at this unconventional company looked like before it became one of the most famous companies in the world.",
       "video_caption": "The insane deadline on this film could have been paralyzing, but actually moving as fast as we did worked to our benefit. There was not enough time for multiple stakeholders to nit pick, or add fluff to the concept. We moved rapidly towards approval from Sam Altman, and in a blink it was out into the world— much the same way I'm sure it feels for the researchers and developers building the actual products at OpenAI.",
       "results": "On December 15th this video appeared at the top of the landing page of OpenAI and stayed there for 2 days, getting millions of (untracked) views.",
@@ -95,7 +95,7 @@ export const portfolioData = {
       "id": "bose-alexa",
       "client": "Bose",
       "title": "Bose + Alexa",
-      "strategy_line": "With Alexa now in headphones, eyeballs are liberated from screens.",
+      "strategy_line": "With Alexa in headphones, eyeballs are liberated from screens.",
       "overview": "With the invention of Amazon's Alexa, we were introducing a new user interface— from GUI to VUI— or 'graphical user interface' to 'voice user interface.' With the announcement of Alexa functionality now being included in new Bose headphones, we saw an opportunity to celebrate exactly what the benefit of VUI is over GUI. With Alexa now in your headphones, you can spend more time taking in the world around you, and less time staring down at your phone (your GUI). What made this concept fun was the imagining of things that happen in the world around us that we wouldn't want to miss. The simple campaign line became 'Don't miss a thing.'",
       "video_caption": "We partnered with director duo Alaska out of Buenos Aires. We shot in Montevideo, Uruguay— which afforded us enormous cost savings (including capturing a fully cop car chase scene directly in front Uruguay’s actual capital building).",
       "results": "According to Ad Tracker in a campaign wrap-up, this work beat expectations across the board, particularly in 'Attention' (693 v. 636 expected) 'Desire' (631 v. 562 expected) and 'Change' (688 v. 618 expected).",
