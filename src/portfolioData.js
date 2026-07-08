@@ -12,7 +12,7 @@ export const portfolioData = {
 
   hero: {
     headline: "Andrew Wilcox, Creative Director",
-    subheadline: "I have a borderline unhealthy obsession with new technology and gadgets. This is my dream job— getting millions of people as excited about new technologies as I am. I partner with builders— putting the same energy and dedication into building new product stories as they do in building new products."
+    subheadline: "I BELIEVE TECHNOLOGY HAS THE POWER TO IMPROVE OUR LIVES AND THE WORLD AROUND US. IT HAS BEEN MY DREAM JOB FOR THE LAST 20+ YEARS TO HELP BRANDS DEMONSTRATE HOW THEY ARE INVENTING A BRIGHTER, MORE EQUITABLE, AND MORE SUSTAINABLE FUTURE FOR ALL OF US. I PARTNER WITH BUILDERS, PUTTING THE SAME PASSION AND CREATIVITY INTO BUILDING NEW BRANDS AS THEY DO IN BUILDING NEW PRODUCTS."
   },
 
   about: {

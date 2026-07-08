@@ -33,30 +33,30 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
     <div className="relative flex flex-col items-center">
       {/* Physical Card Container with 3D Perspective */}
       <div 
-        className="relative w-12 h-12 md:w-[3.25rem] md:h-[3.25rem] bg-[#101012] rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.5)] select-none border border-stone-900" 
+        className="relative w-[1.95rem] h-[1.95rem] md:w-[2.11rem] md:h-[2.11rem] bg-[#101012] rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.5)] select-none border border-stone-900" 
         style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
       >
         {/* Left metal hinge */}
-        <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 w-[4px] h-2.5 bg-[#2a2a2c] rounded-[1px] border border-black/80 z-30" />
+        <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 w-[3px] h-2 bg-[#2a2a2c] rounded-[1px] border border-black/80 z-30" />
         {/* Right metal hinge */}
-        <div className="absolute right-[-2px] top-1/2 -translate-y-1/2 w-[4px] h-2.5 bg-[#2a2a2c] rounded-[1px] border border-black/80 z-30" />
+        <div className="absolute right-[-2px] top-1/2 -translate-y-1/2 w-[3px] h-2 bg-[#2a2a2c] rounded-[1px] border border-black/80 z-30" />
 
         {/* 1. TOP STATIC HALF (Shows next/new value if flipping, otherwise current value) */}
-        <div className="absolute inset-x-0 top-0 h-[50%] overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md border-b border-black/40">
-          <div className="absolute top-0 inset-x-0 h-12 md:h-[3.25rem] flex items-center justify-center font-mono text-xl md:text-2xl font-light text-[#f4f4f7] tracking-tight leading-none">
+        <div className="absolute inset-x-0 top-0 h-[50%] overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md">
+          <div className="absolute top-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
             {isFlipping ? displayNext : displayCurrent}
           </div>
         </div>
 
         {/* 2. BOTTOM STATIC HALF (Shows current/old value) */}
         <div className="absolute inset-x-0 bottom-0 h-[50%] overflow-hidden bg-gradient-to-b from-[#0a0a0c] to-[#060608] rounded-b-md">
-          <div className="absolute bottom-0 inset-x-0 h-12 md:h-[3.25rem] flex items-center justify-center font-mono text-xl md:text-2xl font-light text-[#f4f4f7] tracking-tight leading-none">
+          <div className="absolute bottom-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
             {displayCurrent}
           </div>
         </div>
 
         {/* CENTRAL SPLIT LINE */}
-        <div className="absolute top-[50%] left-0 right-0 h-[1px] bg-black/80 z-20 shadow-[0_0.5px_0_rgba(255,255,255,0.06)]" />
+        <div className="absolute top-[50%] -translate-y-[0.5px] left-0 right-0 h-[1px] bg-black z-20 shadow-[0_0.5px_0_rgba(255,255,255,0.06)]" />
 
         {/* 3. FLIPPING FLAP PANEL */}
         {isFlipping && (
@@ -78,9 +78,9 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
             {/* FRONT FACE of top flap (Shows top half of current value) */}
             <div 
               style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-              className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md border-b border-black/40"
+              className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md"
             >
-              <div className="absolute top-0 inset-x-0 h-12 md:h-[3.25rem] flex items-center justify-center font-mono text-xl md:text-2xl font-light text-[#f4f4f7] tracking-tight leading-none">
+              <div className="absolute top-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
                 {displayCurrent}
               </div>
             </div>
@@ -94,7 +94,7 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
               }}
               className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#0a0a0c] to-[#060608] rounded-b-md"
             >
-              <div className="absolute bottom-0 inset-x-0 h-12 md:h-[3.25rem] flex items-center justify-center font-mono text-xl md:text-2xl font-light text-[#f4f4f7] tracking-tight leading-none">
+              <div className="absolute bottom-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
                 {displayNext}
               </div>
             </div>
@@ -103,7 +103,7 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
       </div>
 
       {/* Label - absolutely positioned below to avoid structural alignment skew, perfectly centered */}
-      <span className="absolute top-full left-0 right-0 mt-1.5 w-full text-center font-mono text-xs tracking-widest text-neutral-400 uppercase select-none leading-none whitespace-nowrap">
+      <span className="absolute top-full left-0 right-0 mt-1 w-full text-center font-mono text-[6.5px] tracking-widest text-neutral-400 uppercase select-none leading-none whitespace-nowrap">
         {label}
       </span>
     </div>
