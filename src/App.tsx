@@ -617,21 +617,24 @@ export default function App() {
         }}
       />
 
+      {/* Persistent Progressive Blur Overlay (All Devices - Ultra Subtle - Pure Optical Blur) */}
+      <div className="fixed top-0 inset-x-0 h-[30px] md:h-[60px] z-40 pointer-events-none select-none">
+        {/* Layered blur stops for pure optical depth of field ONLY - NO COLOR TINT */}
+        <div className="absolute inset-0 backdrop-blur-[2px] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,transparent_25%)] [mask-image:linear-gradient(to_bottom,black_0%,transparent_25%)]"></div>
+        <div className="absolute inset-0 backdrop-blur-[4px] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,transparent_50%)] [mask-image:linear-gradient(to_bottom,black_0%,transparent_50%)]"></div>
+        <div className="absolute inset-0 backdrop-blur-[8px] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,transparent_75%)] [mask-image:linear-gradient(to_bottom,black_0%,transparent_75%)]"></div>
+        <div className="absolute inset-0 backdrop-blur-[16px] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,transparent_100%)] [mask-image:linear-gradient(to_bottom,black_0%,transparent_100%)]"></div>
+      </div>
+
       {/* -------------------------------------------------------------------------
           SMART HIDING NAVIGATION BAR
           ------------------------------------------------------------------------- */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isNavbarVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
         }`}
         style={{ 
-          backgroundColor: prevScrollPos > 40 
-            ? (isLightActive ? 'rgba(255,255,255,0.85)' : 'rgba(10,10,12,0.85)') 
-            : 'transparent',
-          backdropFilter: prevScrollPos > 40 ? 'blur(16px)' : 'none',
-          borderBottom: prevScrollPos > 40 
-            ? (isLightActive ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(255,255,255,0.05)') 
-            : '1px solid transparent'
+          backgroundColor: 'transparent'
         }}
       >
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -829,7 +832,7 @@ export default function App() {
           className="max-w-6xl mx-auto px-6 pt-8 pb-4 md:pt-12 md:pb-6"
         >
           <div className="max-w-4xl">
-            <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40 block mb-8">
+            <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-100 block mb-8">
               / HELLO /
             </span>
             
@@ -840,7 +843,7 @@ export default function App() {
               </span>
             </h1>
 
-            <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl opacity-70 mt-4">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl opacity-100 mt-4">
               {portfolioData.hero.subheadline}
             </p>
           </div>
@@ -854,7 +857,7 @@ export default function App() {
         >
           <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-8 gap-4">
             <div>
-              <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40">
+              <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-100">
                 / INDEX /
               </span>
               <h2 className="text-xl md:text-2xl font-bold tracking-tight uppercase mt-1">
@@ -920,7 +923,7 @@ export default function App() {
         >
           <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-16 gap-4">
             <div>
-              <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40">
+              <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-100">
                 / EXTRA /
               </span>
               <h2 className="text-xl md:text-2xl font-bold tracking-tight uppercase mt-1">
@@ -928,7 +931,7 @@ export default function App() {
               </h2>
             </div>
             
-            <p className="text-xs font-mono max-w-xs opacity-50 uppercase tracking-widest leading-relaxed text-right md:text-right">
+            <p className="text-xs font-mono max-w-xs opacity-100 uppercase tracking-widest leading-relaxed text-right md:text-right">
               *experimental side projects and creative explorations.
             </p>
           </div>
@@ -989,7 +992,7 @@ export default function App() {
             <div className="space-y-8 md:space-y-10">
               {/* Header */}
               <div className="space-y-4">
-                <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-40">
+                <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-100">
                   / EXPERIENCE /
                 </span>
                 <h2 className="font-young text-2xl md:text-4xl font-normal tracking-tight normal-case leading-tight mt-1">
@@ -998,7 +1001,7 @@ export default function App() {
               </div>
 
               {/* Biography Text */}
-              <div className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed opacity-70 font-normal space-y-6 max-w-3xl">
+              <div className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed opacity-100 font-normal space-y-6 max-w-3xl">
                 <p>{portfolioData.about.biography}</p>
               </div>
 
@@ -1098,18 +1101,18 @@ export default function App() {
                         </h4>
                         
                         {/* Dates to the right, in narrow typeface, same font size (text-xs) */}
-                        <div className="font-mono text-xs tracking-[0.18em] uppercase opacity-75 shrink-0">
+                        <div className="font-mono text-xs tracking-[0.18em] uppercase opacity-100 shrink-0">
                           {item.years}
                         </div>
                       </div>
                       
                       {/* Underneath: location of the client in narrow typeface */}
-                      <div className="font-mono text-xs tracking-[0.18em] uppercase opacity-80">
+                      <div className="font-mono text-xs tracking-[0.18em] uppercase opacity-100">
                         {item.location}
                       </div>
                       
                       {/* Summary description in narrow typeface, same font size (text-xs) - runs continuously with no max-w constraints */}
-                      <p className="font-mono text-xs tracking-[0.18em] uppercase opacity-50 leading-relaxed font-light w-full">
+                      <p className="font-mono text-xs tracking-[0.18em] uppercase opacity-100 leading-relaxed font-light w-full">
                         {item.desc}
                       </p>
                     </div>
@@ -1198,7 +1201,7 @@ export default function App() {
                     <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                       THE OBJECTIVE
                     </h4>
-                    <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-70 md:transition-colors md:duration-300 cursor-default md:hover:text-white md:hover:opacity-100">
+                    <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-100 md:transition-colors md:duration-300 cursor-default md:hover:text-white">
                       {selectedCaseStudy.overview}
                     </p>
                   </div>
@@ -1231,7 +1234,7 @@ export default function App() {
 
                           {/* 5. NEW: video_caption text directly below primary video */}
                           {selectedCaseStudy.video_caption && (
-                            <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-70 md:transition-colors md:duration-300 cursor-default md:hover:text-white md:hover:opacity-100">
+                            <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-100 md:transition-colors md:duration-300 cursor-default md:hover:text-white">
                               {selectedCaseStudy.video_caption}
                             </p>
                           )}
@@ -1250,7 +1253,7 @@ export default function App() {
                     <h4 className="text-xs font-sans tracking-widest uppercase text-zinc-500 mb-4">
                       OUTCOMES
                     </h4>
-                    <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-70 md:transition-colors md:duration-300 cursor-default md:hover:text-white md:hover:opacity-100">
+                    <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl pr-4 md:pr-16 text-white opacity-100 md:opacity-100 md:transition-colors md:duration-300 cursor-default md:hover:text-white">
                       {selectedCaseStudy.results}
                     </p>
                   </div>

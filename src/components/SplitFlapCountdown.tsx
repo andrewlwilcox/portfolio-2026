@@ -42,21 +42,21 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
         <div className="absolute right-[-2px] top-1/2 -translate-y-1/2 w-[3px] h-2 bg-[#2a2a2c] rounded-[1px] border border-black/80 z-30" />
 
         {/* 1. TOP STATIC HALF (Shows next/new value if flipping, otherwise current value) */}
-        <div className="absolute inset-x-0 top-0 h-[50%] overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md">
-          <div className="absolute top-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
+        <div className="absolute inset-x-0 top-0 h-1/2 overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md p-0">
+          <div className="absolute top-0 inset-x-0 h-[200%] flex items-center justify-center font-mono text-xs font-semibold text-[#f4f4f7] tracking-tight leading-none">
             {isFlipping ? displayNext : displayCurrent}
           </div>
         </div>
 
         {/* 2. BOTTOM STATIC HALF (Shows current/old value) */}
-        <div className="absolute inset-x-0 bottom-0 h-[50%] overflow-hidden bg-gradient-to-b from-[#0a0a0c] to-[#060608] rounded-b-md">
-          <div className="absolute bottom-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
+        <div className="absolute inset-x-0 bottom-0 h-1/2 overflow-hidden bg-gradient-to-b from-[#0a0a0c] to-[#060608] rounded-b-md p-0">
+          <div className="absolute top-0 inset-x-0 h-[200%] -translate-y-1/2 flex items-center justify-center font-mono text-xs font-semibold text-[#f4f4f7] tracking-tight leading-none">
             {displayCurrent}
           </div>
         </div>
 
         {/* CENTRAL SPLIT LINE */}
-        <div className="absolute top-[50%] -translate-y-[0.5px] left-0 right-0 h-[1px] bg-black z-20 shadow-[0_0.5px_0_rgba(255,255,255,0.06)]" />
+        <div className="absolute top-1/2 -translate-y-[0.5px] left-0 right-0 h-[1px] bg-black z-20" />
 
         {/* 3. FLIPPING FLAP PANEL */}
         {isFlipping && (
@@ -73,14 +73,14 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
               transformStyle: 'preserve-3d',
               transformOrigin: '50% 100%',
             }}
-            className="absolute inset-x-0 top-0 h-[50%] z-10 origin-bottom"
+            className="absolute inset-x-0 top-0 h-1/2 z-10 origin-bottom"
           >
             {/* FRONT FACE of top flap (Shows top half of current value) */}
             <div 
               style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-              className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md"
+              className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#161618] to-[#0e0e10] rounded-t-md p-0"
             >
-              <div className="absolute top-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
+              <div className="absolute top-0 inset-x-0 h-[200%] flex items-center justify-center font-mono text-xs font-semibold text-[#f4f4f7] tracking-tight leading-none">
                 {displayCurrent}
               </div>
             </div>
@@ -92,9 +92,9 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'rotateX(180deg)' 
               }}
-              className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#0a0a0c] to-[#060608] rounded-b-md"
+              className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#0a0a0c] to-[#060608] rounded-b-md p-0"
             >
-              <div className="absolute bottom-0 inset-x-0 h-[1.95rem] md:h-[2.11rem] flex items-center justify-center font-mono text-sm font-light text-[#f4f4f7] tracking-tight leading-none">
+              <div className="absolute top-0 inset-x-0 h-[200%] -translate-y-1/2 flex items-center justify-center font-mono text-xs font-semibold text-[#f4f4f7] tracking-tight leading-none">
                 {displayNext}
               </div>
             </div>
