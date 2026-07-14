@@ -20,6 +20,7 @@ import MagneticText from './components/MagneticText';
 import MagneticImage3D from './components/MagneticImage3D';
 import ProjectRow from './components/ProjectRow';
 import { SplitFlapCountdown } from './components/SplitFlapCountdown';
+import AutoplayVideo from './components/AutoplayVideo';
 import { motion, AnimatePresence } from 'motion/react';
 
 const AVAILABILITY_DATE = "2026-09-02T09:00:00";
@@ -577,7 +578,7 @@ export default function App() {
         }
 
         const hashQuery = hashParam ? `&h=${hashParam}` : '';
-        return `https://player.vimeo.com/video/${id}?background=0&autoplay=0&muted=0${hashQuery}`;
+        return `https://player.vimeo.com/video/${id}?api=1&controls=1&muted=0&autoplay=0&autopause=0${hashQuery}`;
       }
       
       const vimeoDomainRemoved = url
@@ -592,7 +593,7 @@ export default function App() {
       const hash = pathParts[1];
       if (id) {
         const hashQuery = hash ? `&h=${hash}` : '';
-        return `https://player.vimeo.com/video/${id}?background=0&autoplay=0&muted=0${hashQuery}`;
+        return `https://player.vimeo.com/video/${id}?api=1&controls=1&muted=0&autoplay=0&autopause=0${hashQuery}`;
       }
     } catch (e) {
       console.error("Embed URL parsing error", e);
@@ -637,7 +638,7 @@ export default function App() {
           backgroundColor: 'transparent'
         }}
       >
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 h-20 flex items-center justify-between">
           
           {/* Top-Left: "Let's Talk" button (Desktop & Mobile left-aligned) */}
           <div className="flex items-center">
@@ -829,9 +830,9 @@ export default function App() {
         {/* 1. Hero Introduction */}
         <section 
           id="hero" 
-          className="max-w-6xl mx-auto px-6 pt-8 pb-4 md:pt-12 md:pb-6"
+          className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-8 pb-4 md:pt-12 md:pb-6"
         >
-          <div className="max-w-4xl">
+          <div className="max-w-3xl">
             <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-100 block mb-8">
               / HELLO /
             </span>
@@ -852,7 +853,7 @@ export default function App() {
         {/* 2. Interactive Work Index List (Carbon Copy 1:1 physics tracker) */}
         <section 
           id="work" 
-          className="max-w-6xl mx-auto px-6 pt-6 pb-4 md:pt-8 md:pb-6 border-t"
+          className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-6 pb-4 md:pt-8 md:pb-6 border-t"
           style={{ borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)' }}
         >
           <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-8 gap-4">
@@ -918,7 +919,7 @@ export default function App() {
         {/* 2.5. Side Projects Section */}
         <section 
           id="side-projects" 
-          className="max-w-6xl mx-auto px-6 pt-4 pb-4 md:pt-6 md:pb-6 border-t"
+          className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-4 pb-4 md:pt-6 md:pb-6 border-t"
           style={{ borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)' }}
         >
           <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-16 gap-4">
@@ -986,7 +987,7 @@ export default function App() {
          <div id="connect">
           <section 
             id="about" 
-            className="max-w-6xl mx-auto px-6 pt-4 pb-12 md:pt-5 md:pb-16 border-t"
+            className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-4 pb-12 md:pt-5 md:pb-16 border-t"
             style={{ borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)' }}
           >
             <div className="space-y-8 md:space-y-10">
@@ -1156,7 +1157,7 @@ export default function App() {
             </motion.div>
 
             {/* Layout width constrained to exactly match the main index layout */}
-            <div className="max-w-6xl w-full mx-auto px-4 md:px-8 pt-24 pb-32">
+            <div className="max-w-screen-2xl w-full mx-auto px-6 md:px-12 2xl:px-24 pt-24 pb-32">
               
               {/* Header Details: Typography kept at top, perfectly left-aligned */}
               <div className="border-b border-white/10 pb-8 mb-12 space-y-6">
@@ -1178,18 +1179,18 @@ export default function App() {
               <div className="space-y-16">
                 
                 {/* 2. New Hero Image & Strategy Block */}
-                <div className="relative w-full aspect-[16/5] min-h-[150px] md:min-h-[220px] rounded-none overflow-hidden bg-zinc-950 shadow-2xl">
+                <div className="relative w-full aspect-[16/5] rounded-none overflow-hidden bg-zinc-950 shadow-2xl flex items-center">
                   <img 
                     src={selectedCaseStudy.hoverGifUrl || (selectedCaseStudy.gallery_images && selectedCaseStudy.gallery_images[0]) || (selectedCaseStudy.images && selectedCaseStudy.images[0]) || ''} 
                     alt={`${selectedCaseStudy.title} Strategy Backing`} 
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover select-none pointer-events-none"
+                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
                   />
-                  {/* Subtle CSS dark gradient scrim overlay for perfect text legibility */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/85 pointer-events-none" />
+                  {/* Subtle 15% scrim overlay to improve text legibility */}
+                  <div className="absolute inset-0 bg-black/15 pointer-events-none" />
                   {/* Large white typography overlay without text drop shadows */}
-                  <div className="absolute inset-0 flex items-center justify-start p-6 md:p-12 pl-0 md:pl-0 text-left pointer-events-none">
-                    <h3 className="font-young text-2xl sm:text-3xl md:text-7xl text-white tracking-tight leading-tight md:leading-none max-w-5xl font-normal normal-case">
+                  <div className="absolute inset-0 z-10 w-full h-full flex items-center justify-start p-0 text-left pointer-events-none">
+                    <h3 className="font-young text-[clamp(1.25rem,4vw,5rem)] text-white tracking-tight leading-none w-[98%] pl-3 md:pl-8 2xl:pl-12 py-0 text-balance font-normal normal-case">
                       {getProjectStrategyLine(selectedCaseStudy.id)}
                     </h3>
                   </div>
@@ -1222,12 +1223,9 @@ export default function App() {
                       if (!embedUrl) return null;
                       return (
                         <div className="space-y-3">
-                          <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl">
-                            <iframe
+                          <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl">
+                            <AutoplayVideo
                                src={embedUrl}
-                               className="absolute inset-0 w-full h-full border-0"
-                               allow="autoplay; fullscreen; picture-in-picture"
-                               allowFullScreen
                                title={`${selectedCaseStudy.title} Primary Video`}
                             />
                           </div>
@@ -1275,13 +1273,10 @@ export default function App() {
                         return (
                           <div 
                             key={`video-add-${idx}`} 
-                            className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl transition-all"
+                            className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl transition-all"
                           >
-                            <iframe
+                            <AutoplayVideo
                               src={embedUrl}
-                              className="absolute inset-0 w-full h-full border-0"
-                              allow="autoplay; fullscreen; picture-in-picture"
-                              allowFullScreen
                               title={`${selectedCaseStudy.title} Video ${idx + 2}`}
                             />
                           </div>
@@ -1330,7 +1325,7 @@ export default function App() {
           MODERN MINIMAL HUMBLE FOOTER
           ------------------------------------------------------------------------- */}
       <footer 
-        className="max-w-6xl mx-auto px-6 py-12 border-t flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-[0.62rem] uppercase tracking-widest text-stone-500 mt-16"
+        className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 py-12 border-t flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-[0.62rem] uppercase tracking-widest text-stone-500 mt-16"
         style={{ 
           borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'
         }}
