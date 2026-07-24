@@ -121,17 +121,24 @@ export default function ProjectRow({
       <div className={`flex items-center space-x-3 md:space-x-12 z-10 transition-transform duration-300 md:group-hover:-translate-x-[4.25rem] ${
         isMobileViewport && isMobileActive ? '-translate-x-[1.75rem]' : ''
       }`}>
-        <span className="font-mono text-xs md:text-sm tracking-widest opacity-40 select-none">
+        <span data-chaos="word" data-text={numStr} className="font-mono text-xs md:text-sm tracking-widest opacity-40 select-none">
           {numStr}
         </span>
         <h3 className="font-young text-4xl md:text-8xl font-normal tracking-tight normal-case transition-all duration-300 leading-none">
-          {displayTitle}
+          {displayTitle.split(' ').map((word, wIdx) => (
+            <React.Fragment key={wIdx}>
+              {wIdx > 0 && ' '}
+              <span data-chaos="word" data-text={word} className="inline-block">
+                {word}
+              </span>
+            </React.Fragment>
+          ))}
         </h3>
       </div>
 
       {/* DESKTOP ONLY: Right side info metadata */}
       <div className="hidden md:flex md:items-center space-x-6 md:space-x-12 z-10 font-mono text-xs tracking-wider uppercase">
-        <span className="opacity-50">
+        <span data-chaos="word" data-text={project.category} className="opacity-50">
           {project.category}
         </span>
 

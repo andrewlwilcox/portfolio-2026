@@ -7,3 +7,121 @@
   --font-young: "Young Serif", serif;
 }
 
+/* Chaos Engine Active Overrides - Deaden background and hide magnetic container */
+.chaos-active #root,
+.chaos-active main,
+.chaos-active section,
+.chaos-active header,
+.chaos-active footer,
+.chaos-active div,
+.chaos-active a,
+.chaos-active span,
+.chaos-active button {
+  pointer-events: none !important;
+}
+
+.chaos-active [data-chaos-ignore="true"],
+.chaos-active [data-chaos-ignore="true"] * {
+  pointer-events: auto !important;
+}
+
+/* Ensure paint cursor NEVER intercepts pointer events */
+#paint-cursor,
+#paint-cursor * {
+  pointer-events: none !important;
+}
+
+.chaos-active:not(.chaos-paint):not(.chaos-googly) .magnetic-text-container {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.chaos-paint,
+body.chaos-paint * {
+  cursor: none !important;
+}
+
+body.chaos-paint .magnetic-text-container,
+body.chaos-googly .magnetic-text-container {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+}
+
+#chaos-dom-container {
+  pointer-events: none !important;
+  position: absolute !important;
+  z-index: 2147483647 !important;
+  isolation: isolate !important;
+}
+
+/* Googly Eyes Solid & Opaque Enforcement */
+#chaos-dom-container,
+#chaos-dom-container *,
+.chaos-googly-pair,
+.chaos-googly-pair * {
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.chaos-eyeball {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  fill: #ffffff !important;
+  fill-opacity: 1 !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  z-index: 1 !important;
+}
+
+.chaos-pupil {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  fill: #000000 !important;
+  fill-opacity: 1 !important;
+  stroke: none !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  position: absolute !important;
+  z-index: 10 !important;
+}
+
+.chaos-eyelid-top,
+.chaos-eyelid-bottom {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  fill: #000000 !important;
+  fill-opacity: 1 !important;
+  stroke: none !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  z-index: 20 !important;
+}
+
+/* Chaos Mode Escape Hatch Opaque White Controls */
+.chaos-esc-kbd,
+.chaos-esc-kbd * {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+}
+
+.chaos-close-btn {
+  opacity: 1 !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  mix-blend-mode: normal !important;
+}
+
+.chaos-close-btn *,
+.chaos-close-btn svg,
+.chaos-close-btn svg * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+}
+

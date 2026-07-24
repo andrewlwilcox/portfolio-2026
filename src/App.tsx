@@ -21,6 +21,8 @@ import MagneticImage3D from './components/MagneticImage3D';
 import ProjectRow from './components/ProjectRow';
 import { SplitFlapCountdown } from './components/SplitFlapCountdown';
 import AutoplayVideo from './components/AutoplayVideo';
+import { ChaosWidget, ChaosMode } from './components/ChaosWidget';
+import { ChaosEngine } from './components/ChaosEngine';
 import { motion, AnimatePresence } from 'motion/react';
 
 const AVAILABILITY_DATE = "2026-09-02T09:00:00";
@@ -60,6 +62,9 @@ export default function App() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [sentMessages, setSentMessages] = useState<any[]>([]);
   const [showSentLogs, setShowSentLogs] = useState(false);
+
+  // Chaos Easter Egg Mode State
+  const [chaosMode, setChaosMode] = useState<ChaosMode>('normal');
 
   // General UI States
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -724,7 +729,7 @@ export default function App() {
             {/* Grouped dynamic text and SplitFlapCountdown (Desktop only) */}
             <div className="hidden md:flex items-center justify-end gap-2 md:gap-3">
               <div className="text-right font-mono text-xs tracking-widest text-neutral-400 uppercase leading-normal select-none">
-                AVAILABLE FOR NEW PROJECTS STARTING <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
+                AVAILABLE FOR LONG-TERM PROJECTS STARTING <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
               </div>
               <SplitFlapCountdown availabilityDateTime={AVAILABILITY_DATE} />
             </div>
@@ -832,20 +837,37 @@ export default function App() {
           id="hero" 
           className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-8 pb-4 md:pt-12 md:pb-6"
         >
-          <div className="max-w-3xl">
+          <div className="relative w-full">
             <span className="font-mono text-xs uppercase tracking-[0.3em] opacity-100 block mb-8">
               / HELLO /
             </span>
             
-            <h1 className="font-young text-[9.8vw] md:text-8xl font-normal tracking-tight leading-[1.05] normal-case">
-              <span className="block whitespace-nowrap overflow-visible">Andrew Wilcox</span>
-              <span className="block whitespace-nowrap overflow-visible">
-                <MagneticText text="Creative Director" />
-              </span>
-            </h1>
+            <div className="relative w-full">
+              <h1 className="font-young text-[9.8vw] md:text-8xl font-normal tracking-tight leading-[1.05] normal-case max-w-3xl">
+                <span className="block whitespace-nowrap overflow-visible">
+                  <span data-chaos="word" data-text="Andrew" className="inline-block mr-[0.25em]">Andrew</span>
+                  <span data-chaos="word" data-text="Wilcox" className="inline-block">Wilcox</span>
+                </span>
+                <span className="block whitespace-nowrap overflow-visible">
+                  <MagneticText text="Creative Director" />
+                </span>
+              </h1>
+
+              {/* Chaos Widget trigger button positioned absolutely at top right of the typography container (Desktop only) */}
+              <div className="hidden md:block absolute right-0 top-3 md:top-6 2xl:top-8 z-30">
+                <ChaosWidget chaosMode={chaosMode} setChaosMode={setChaosMode} />
+              </div>
+            </div>
 
             <p className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed max-w-3xl opacity-100 mt-4">
-              {portfolioData.hero.subheadline}
+              {portfolioData.hero.subheadline.split(' ').map((word: string, i: number) => (
+                <React.Fragment key={i}>
+                  {i > 0 && ' '}
+                  <span data-chaos="word" data-text={word} className="inline-block">
+                    {word}
+                  </span>
+                </React.Fragment>
+              ))}
             </p>
           </div>
         </section>
@@ -853,6 +875,7 @@ export default function App() {
         {/* 2. Interactive Work Index List (Carbon Copy 1:1 physics tracker) */}
         <section 
           id="work" 
+          data-chaos="line"
           className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-6 pb-4 md:pt-8 md:pb-6 border-t"
           style={{ borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)' }}
         >
@@ -862,7 +885,8 @@ export default function App() {
                 / INDEX /
               </span>
               <h2 className="text-xl md:text-2xl font-bold tracking-tight uppercase mt-1">
-                Selected Work
+                <span data-chaos="word" data-text="Selected" className="inline-block mr-[0.25em]">Selected</span>
+                <span data-chaos="word" data-text="Work" className="inline-block">Work</span>
               </h2>
             </div>
           </div>
@@ -919,6 +943,7 @@ export default function App() {
         {/* 2.5. Side Projects Section */}
         <section 
           id="side-projects" 
+          data-chaos="line"
           className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-4 pb-4 md:pt-6 md:pb-6 border-t"
           style={{ borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)' }}
         >
@@ -928,11 +953,12 @@ export default function App() {
                 / EXTRA /
               </span>
               <h2 className="text-xl md:text-2xl font-bold tracking-tight uppercase mt-1">
-                Side Work
+                <span data-chaos="word" data-text="Side" className="inline-block mr-[0.25em]">Side</span>
+                <span data-chaos="word" data-text="Work" className="inline-block">Work</span>
               </h2>
             </div>
             
-            <p className="text-xs font-mono max-w-xs opacity-100 uppercase tracking-widest leading-relaxed text-right md:text-right">
+            <p className="text-xs font-mono max-w-xs opacity-100 uppercase tracking-widest leading-relaxed text-left md:text-right">
               *experimental side projects and creative explorations.
             </p>
           </div>
@@ -987,6 +1013,7 @@ export default function App() {
          <div id="connect">
           <section 
             id="about" 
+            data-chaos="line"
             className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 pt-4 pb-12 md:pt-5 md:pb-16 border-t"
             style={{ borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)' }}
           >
@@ -997,13 +1024,29 @@ export default function App() {
                   / EXPERIENCE /
                 </span>
                 <h2 className="font-young text-2xl md:text-4xl font-normal tracking-tight normal-case leading-tight mt-1">
-                  {portfolioData.about.philosophyHeadline}
+                  {portfolioData.about.philosophyHeadline.split(' ').map((word: string, i: number) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && ' '}
+                      <span data-chaos="word" data-text={word} className="inline-block">
+                        {word}
+                      </span>
+                    </React.Fragment>
+                  ))}
                 </h2>
               </div>
 
               {/* Biography Text */}
               <div className="font-mono text-xs uppercase tracking-[0.18em] leading-relaxed opacity-100 font-normal space-y-6 max-w-3xl">
-                <p>{portfolioData.about.biography}</p>
+                <p>
+                  {portfolioData.about.biography.split(' ').map((word: string, i: number) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && ' '}
+                      <span data-chaos="word" data-text={word} className="inline-block">
+                        {word}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </p>
               </div>
 
               {/* Handcrafted Résumé List */}
@@ -1341,6 +1384,9 @@ export default function App() {
           IF YOU'RE READING THIS I APPRECIATE YOUR ATTENTION TO DETAIL. WE SHOULD WORK TOGETHER.
         </div>
       </footer>
+
+      {/* Chaos Physics Engine Objectification & Viewport Controller */}
+      <ChaosEngine activeMode={chaosMode} onReset={() => setChaosMode('normal')} />
 
     </div>
   );
