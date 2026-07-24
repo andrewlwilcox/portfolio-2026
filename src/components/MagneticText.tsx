@@ -6,6 +6,7 @@ interface MagneticLetterTopProps {
   char: string;
   mouseX: MotionValue<number>;
   mouseY: MotionValue<number>;
+  isTouchMotion: MotionValue<number>;
   bgColor?: string;
   disabled?: boolean;
 }
@@ -14,6 +15,7 @@ function MagneticLetterTop({
   char,
   mouseX,
   mouseY,
+  isTouchMotion,
   bgColor = '#ffffff',
   disabled = false,
 }: MagneticLetterTopProps) {
@@ -58,33 +60,62 @@ function MagneticLetterTop({
       const letterCenterX = rect.left + rect.width / 2;
       const letterCenterY = rect.top + rect.height / 2;
 
-      const distanceX = mX - letterCenterX;
-      const distanceY = mY - letterCenterY;
-      const distance = Math.hypot(distanceX, distanceY);
+      const isTouch = isTouchMotion.get() === 1 || window.matchMedia('(pointer: coarse)').matches;
 
-      const threshold = 180;
-      if (distance < threshold) {
-        const ratio = 1 - (distance / threshold);
-        const falloffRatio = ratio * ratio;
-        const pullFactor = 0.45;
-        x.set(distanceX * pullFactor * falloffRatio);
-        y.set(distanceY * pullFactor * falloffRatio);
+      if (isTouch) {
+        // MOBILE / TOUCH REPULSION
+        // Vector = ObjectPosition - TouchPosition (pushing AWAY from finger)
+        const repulsionX = letterCenterX - mX;
+        const repulsionY = letterCenterY - mY;
+        const distance = Math.hypot(repulsionX, repulsionY);
+
+        // Increased radius for mobile touch (~350px)
+        const threshold = 350;
+        if (distance < threshold) {
+          const ratio = 1 - (distance / threshold);
+          const falloffRatio = ratio * ratio;
+          const pushFactor = 0.5;
+          x.set(repulsionX * pushFactor * falloffRatio);
+          y.set(repulsionY * pushFactor * falloffRatio);
+        } else {
+          x.set(0);
+          y.set(0);
+        }
       } else {
-        x.set(0);
-        y.set(0);
+        // DESKTOP MOUSE INTERACTION
+        const distanceX = mX - letterCenterX;
+        const distanceY = mY - letterCenterY;
+        const distance = Math.hypot(distanceX, distanceY);
+
+        const threshold = 180;
+        if (distance < threshold) {
+          const ratio = 1 - (distance / threshold);
+          const falloffRatio = ratio * ratio;
+          const pullFactor = 0.45;
+          x.set(distanceX * pullFactor * falloffRatio);
+          y.set(distanceY * pullFactor * falloffRatio);
+        } else {
+          x.set(0);
+          y.set(0);
+        }
       }
     };
 
     const unsubscribeX = mouseX.on("change", updatePull);
     const unsubscribeY = mouseY.on("change", updatePull);
+    const unsubscribeTouch = isTouchMotion.on("change", updatePull);
+
+    window.addEventListener('scroll', updatePull, { passive: true });
 
     updatePull();
 
     return () => {
       unsubscribeX();
       unsubscribeY();
+      unsubscribeTouch();
+      window.removeEventListener('scroll', updatePull);
     };
-  }, [mouseX, mouseY, disabled]);
+  }, [mouseX, mouseY, isTouchMotion, disabled]);
 
   return (
     <span
@@ -120,6 +151,7 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
 
   const mouseX = useMotionValue(-10000);
   const mouseY = useMotionValue(-10000);
+  const isTouchMotion = useMotionValue(0);
   const [isPaintMode, setIsPaintMode] = useState(false);
   const [isGooglyMode, setIsGooglyMode] = useState(false);
   const [isChaosActive, setIsChaosActive] = useState(false);
@@ -151,6 +183,7 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
     }
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
+      isTouchMotion.set(0);
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
     };
@@ -160,14 +193,48 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
       mouseY.set(-10000);
     };
 
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isTouchMotion.set(1);
+        const touch = e.touches[0];
+        mouseX.set(touch.clientX);
+        mouseY.set(touch.clientY);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isTouchMotion.set(1);
+        const touch = e.touches[0];
+        mouseX.set(touch.clientX);
+        mouseY.set(touch.clientY);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0) {
+        mouseX.set(-10000);
+        mouseY.set(-10000);
+      }
+    };
+
     window.addEventListener('mousemove', handleGlobalMouseMove);
     document.addEventListener('mouseleave', handleMouseLeaveWindow);
     
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+
     return () => {
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeaveWindow);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [mouseX, mouseY, isPaintMode, isChaosActive, isGooglyMode]);
+  }, [mouseX, mouseY, isTouchMotion, isPaintMode, isChaosActive, isGooglyMode]);
 
   const colors = [
     '#ff07ef',
@@ -235,6 +302,7 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
                     char={char}
                     mouseX={mouseX}
                     mouseY={mouseY}
+                    isTouchMotion={isTouchMotion}
                     bgColor={bgColor}
                     disabled={isPaintMode || isGooglyMode || isChaosActive}
                   />
