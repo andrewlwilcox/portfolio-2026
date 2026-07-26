@@ -287,7 +287,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
         }
       };
 
-      const maxY = window.innerHeight * 1.30;
+      const maxY = window.innerHeight * 1.20;
 
       if (isExplicitLine || isThinLine) {
         // Line must be visible in or up to 30% below the viewport
@@ -431,14 +431,15 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     width: number,
     height: number,
     wallOptions: any,
-    bottomFactor: number = 1.3
+    bottomFactor: number = 1.6,
+    sideMargin: number = 300
   ) => {
     const wallThickness = 100;
     const effectiveHeight = height * bottomFactor;
-    const topWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY - wallThickness / 2, width * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
-    const bottomWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY + effectiveHeight + wallThickness / 2, width * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
-    const leftWall = Matter.Bodies.rectangle(scrollX - wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, label: 'wall', ...wallOptions });
-    const rightWall = Matter.Bodies.rectangle(scrollX + width + wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, label: 'wall', ...wallOptions });
+    const topWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY - wallThickness / 2, (width + sideMargin * 2) * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
+    const bottomWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY + effectiveHeight + wallThickness / 2, (width + sideMargin * 2) * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
+    const leftWall = Matter.Bodies.rectangle(scrollX - sideMargin - wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, label: 'wall', ...wallOptions });
+    const rightWall = Matter.Bodies.rectangle(scrollX + width + sideMargin + wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, label: 'wall', ...wallOptions });
 
     Matter.World.add(engine.world, [topWall, bottomWall, leftWall, rightWall]);
     return [topWall, bottomWall, leftWall, rightWall];
@@ -589,9 +590,9 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     // Spawn Heavy Bulldozer Physics Body (25% smaller: 60x66)
     const dozerWidth = 60;
     const dozerHeight = 66;
-    const spawnX = scrollX + width + 150; // Off-screen right
+    const spawnX = scrollX + width + 40; // Just off-screen right
     const spawnY = scrollY + height * 0.25; // Vertically in middle of upper half
-    const targetIntroX = scrollX + width - 150;
+    const targetIntroX = scrollX + width - 120;
 
     const dozerBody = Matter.Bodies.rectangle(spawnX, spawnY, dozerWidth, dozerHeight, {
       density: 1000,
@@ -610,7 +611,16 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       targetY = e.clientY + window.scrollY;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches && e.touches.length > 0) {
+        targetX = e.touches[0].clientX + window.scrollX;
+        targetY = e.touches[0].clientY + window.scrollY;
+      }
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
 
     // Anti-gravity suspension for dynamic line segment bodies
     const handleBeforeUpdate = () => {
@@ -625,13 +635,18 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
 
     activeCleanupRef.current = () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchstart', handleTouchMove);
       if (engine) {
         Matter.Events.off(engine, 'beforeUpdate', handleBeforeUpdate);
       }
     };
 
-    // Animation Loop (Speed reduced by 20%: 2.623725 * 0.8 = 2.09898)
-    const CONST_SPEED = 2.09898;
+    // Animation Loop (Speed increased by 30%: 2.09898 * 1.3 = 2.728674)
+    const BASE_SPEED = 2.728674;
+    // Scale speed proportionally with viewport width (reference 1200px) so movement pace feels uniform on any screen size
+    const viewportScale = Math.max(0.8, Math.min(1.8, width / 1200));
+    const CONST_SPEED = BASE_SPEED * viewportScale;
     let isIntroFinished = false;
 
     let currDozerX = spawnX;
@@ -639,16 +654,23 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     let currDozerAngle = -Math.PI / 2; // Facing LEFT
     let chugPhase = 0;
 
-    const renderLoop = () => {
+    let lastFrameTime = performance.now();
+
+    const renderLoop = (time: number) => {
+      const deltaMs = Math.min(time - (lastFrameTime || time), 50);
+      lastFrameTime = time;
+      const deltaRatio = deltaMs / (1000 / 60);
+      const stepSpeed = CONST_SPEED * deltaRatio;
+
       let vx = 0;
       let vy = 0;
 
       if (!isIntroFinished) {
-        currDozerX -= CONST_SPEED;
+        currDozerX -= stepSpeed;
         currDozerY = spawnY;
         currDozerAngle = -Math.PI / 2; // Facing LEFT
 
-        vx = -CONST_SPEED;
+        vx = -stepSpeed;
         vy = 0;
 
         Matter.Body.setPosition(dozerBody, { x: currDozerX, y: currDozerY });
@@ -664,13 +686,13 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
 
         if (dist > 10) {
           const targetHeading = Math.atan2(dy, dx) + Math.PI / 2;
-          currDozerAngle = lerpAngle(currDozerAngle, targetHeading, 0.1);
+          currDozerAngle = lerpAngle(currDozerAngle, targetHeading, 0.1 * deltaRatio);
 
           const dirX = Math.sin(currDozerAngle);
           const dirY = -Math.cos(currDozerAngle);
 
-          vx = dirX * CONST_SPEED;
-          vy = dirY * CONST_SPEED;
+          vx = dirX * stepSpeed;
+          vy = dirY * stepSpeed;
 
           currDozerX += vx;
           currDozerY += vy;
@@ -684,7 +706,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
         }
       }
 
-      Matter.Engine.update(engine, 1000 / 60);
+      Matter.Engine.update(engine, (1000 / 60) * deltaRatio);
 
       const currentSpeed = Math.hypot(vx, vy);
       chugPhase += Math.max(0.08, currentSpeed * 0.1);
