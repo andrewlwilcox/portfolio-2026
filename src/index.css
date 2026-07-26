@@ -7,6 +7,30 @@
   --font-young: "Young Serif", serif;
 }
 
+/* Disable native text selection and touch callouts globally for mobile UX */
+html,
+body,
+#root {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Exemptions for inputs, textareas, selectable elements, mailto links */
+input,
+textarea,
+select,
+[contenteditable="true"],
+.selectable,
+.user-select-auto,
+a[href^="mailto:"] {
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  user-select: auto;
+  -webkit-touch-callout: default;
+}
+
 /* Chaos Engine Active Overrides - Deaden background and hide magnetic container */
 .chaos-active #root,
 .chaos-active main,
