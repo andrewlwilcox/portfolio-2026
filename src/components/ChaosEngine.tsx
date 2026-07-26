@@ -133,7 +133,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
   // =========================================================================
   // 2. UNIFIED DOM SETUP & CLONING ENGINE (setupChaosDOM)
   // =========================================================================
-  const setupChaosDOM = () => {
+  const setupChaosDOM = (mode?: string) => {
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
     const width = window.innerWidth;
@@ -162,6 +162,49 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     }
     const createdClones: CreatedClone[] = [];
 
+    // PLINKO MODE SPECIAL: Find "SELECTED WORK" subtitle and hide all elements below it
+    let selectedWorkBottomY: number | null = null;
+    if (mode === 'plinko') {
+      const headings = Array.from(document.querySelectorAll<HTMLElement>('h2, span, div'));
+      const selectedWorkHeading = headings.find((el) => {
+        const text = el.textContent?.trim().toUpperCase() || '';
+        return (text === 'SELECTED WORK' || (text.includes('SELECTED') && text.includes('WORK'))) && el.tagName === 'H2';
+      });
+
+      if (selectedWorkHeading) {
+        const h2Rect = selectedWorkHeading.getBoundingClientRect();
+        selectedWorkBottomY = h2Rect.bottom;
+      }
+
+      // Hide main sections below "SELECTED WORK"
+      const workSection = document.getElementById('work');
+      const sideProjectsSection = document.getElementById('side-projects');
+      const connectSection = document.getElementById('connect');
+
+      // The project list inside #work is all children after the header div
+      const workListContainer = workSection ? Array.from(workSection.children).slice(1) : [];
+
+      const elementsToHide = [
+        ...workListContainer,
+        sideProjectsSection,
+        connectSection,
+      ].filter((el): el is HTMLElement => el !== null);
+
+      elementsToHide.forEach((container) => {
+        hiddenOriginalsRef.current.push({
+          element: container,
+          originalOpacity: container.style.opacity,
+          originalVisibility: container.style.visibility,
+          originalPointerEvents: container.style.pointerEvents,
+          originalDisplay: container.style.display,
+        });
+
+        container.style.opacity = '0';
+        container.style.visibility = 'hidden';
+        container.style.pointerEvents = 'none';
+      });
+    }
+
     // Hide magnetic text containers
     const magneticContainers = Array.from(document.querySelectorAll<HTMLElement>('.magnetic-text-container'));
     magneticContainers.forEach((mContainer) => {
@@ -176,10 +219,10 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       mContainer.style.pointerEvents = 'none';
     });
 
-    // Query opt-in data-chaos elements, hr tags, and horizontal border/line elements
+    // Query opt-in data-chaos elements, hr tags, .divider, and horizontal border/line elements
     const rawElements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        '[data-chaos], hr, .border-t, .border-b, .border-y, [class*="border-t"], [class*="border-b"], [class*="divide-y"] > *'
+        '[data-chaos], hr, .divider, .border-t, .border-b, .border-y, [class*="border-t"], [class*="border-b"], [class*="divide-y"] > *'
       )
     ).filter((el) => {
       if (el.closest('[data-chaos-ignore="true"], #chaos-dom-container, .chaos-bulldozer-cursor')) return false;
@@ -193,32 +236,35 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       processedElements.add(element);
 
       const type = element.getAttribute('data-chaos');
-      const isHr = element.tagName === 'HR';
+      const isHr = element.tagName === 'HR' || element.classList.contains('divider');
       const rect = element.getBoundingClientRect();
 
       if (rect.width <= 0 || rect.height <= 0) return;
 
-      // Exclude partially or fully cropped elements outside visible viewport bounds
-      if (rect.top < 0 || rect.bottom > window.innerHeight) return;
+      // In Plinko mode, skip creating clones/pegs for any elements below SELECTED WORK subtitle
+      if (mode === 'plinko' && selectedWorkBottomY !== null && rect.top >= selectedWorkBottomY - 5) {
+        hiddenOriginalsRef.current.push({
+          element,
+          originalOpacity: element.style.opacity,
+          originalVisibility: element.style.visibility,
+          originalPointerEvents: element.style.pointerEvents,
+          originalBorderTopColor: element.style.borderTopColor,
+          originalBorderBottomColor: element.style.borderBottomColor,
+        });
+        element.style.opacity = '0';
+        element.style.visibility = 'hidden';
+        element.style.pointerEvents = 'none';
+        return;
+      }
 
       const computed = window.getComputedStyle(element);
       const isExplicitLine = type === 'line' || isHr;
-      const isThinLine = rect.height <= 8 && rect.width >= 30;
+      const isThinLine = rect.height <= 8 && rect.width >= 20;
 
-      if (isExplicitLine || isThinLine) {
-        let lineColor = 'rgba(255, 255, 255, 0.2)';
-        if (computed.borderTopColor && computed.borderTopColor !== 'transparent' && computed.borderTopColor !== 'rgba(0, 0, 0, 0)') {
-          lineColor = computed.borderTopColor;
-        } else if (computed.borderColor && computed.borderColor !== 'transparent' && computed.borderColor !== 'rgba(0, 0, 0, 0)') {
-          lineColor = computed.borderColor;
-        } else if (computed.backgroundColor && computed.backgroundColor !== 'transparent' && computed.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-          lineColor = computed.backgroundColor;
-        }
-
-        const numSegments = 3;
+      // Helper function to create breakable line segments across the element's width
+      const addLineSegments = (lineY: number, lineColor: string, borderHeight: number) => {
+        const numSegments = Math.max(6, Math.min(18, Math.floor(rect.width / 70)));
         const segmentWidth = rect.width / numSegments;
-        const borderHeight = Math.max(1, rect.height <= 8 ? rect.height : 1);
-        const lineY = rect.top;
 
         for (let i = 0; i < numSegments; i++) {
           const segLeft = rect.left + i * segmentWidth;
@@ -239,109 +285,126 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
           const mockRect = new DOMRect(segLeft, lineY, segmentWidth, borderHeight);
           createdClones.push({ clone, rect: mockRect, isLine: true });
         }
+      };
 
-        hiddenOriginalsRef.current.push({
-          element,
-          originalOpacity: element.style.opacity,
-          originalVisibility: element.style.visibility,
-          originalPointerEvents: element.style.pointerEvents,
-          originalBorderTopColor: element.style.borderTopColor,
-          originalBorderBottomColor: element.style.borderBottomColor,
-        });
+      const maxY = window.innerHeight * 1.30;
 
-        element.style.opacity = '0';
-        element.style.visibility = 'hidden';
-        element.style.pointerEvents = 'none';
+      if (isExplicitLine || isThinLine) {
+        // Line must be visible in or up to 30% below the viewport
+        if (rect.top <= maxY && rect.bottom >= -50) {
+          let lineColor = 'rgba(255, 255, 255, 0.25)';
+          if (computed.borderTopColor && computed.borderTopColor !== 'transparent' && computed.borderTopColor !== 'rgba(0, 0, 0, 0)') {
+            lineColor = computed.borderTopColor;
+          } else if (computed.borderColor && computed.borderColor !== 'transparent' && computed.borderColor !== 'rgba(0, 0, 0, 0)') {
+            lineColor = computed.borderColor;
+          } else if (computed.backgroundColor && computed.backgroundColor !== 'transparent' && computed.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+            lineColor = computed.backgroundColor;
+          }
+
+          const borderHeight = Math.max(1, rect.height <= 8 ? rect.height : 1);
+          addLineSegments(rect.top, lineColor, borderHeight);
+
+          hiddenOriginalsRef.current.push({
+            element,
+            originalOpacity: element.style.opacity,
+            originalVisibility: element.style.visibility,
+            originalPointerEvents: element.style.pointerEvents,
+            originalBorderTopColor: element.style.borderTopColor,
+            originalBorderBottomColor: element.style.borderBottomColor,
+          });
+
+          // ZERO-SHIFT DOM SWAP: set original divider's opacity to 0
+          element.style.opacity = '0';
+          element.style.pointerEvents = 'none';
+        }
       } else {
         // For larger container elements, check if they have border-t or border-b styling
         const hasBorderTop = computed.borderTopWidth && parseFloat(computed.borderTopWidth) > 0 && computed.borderTopStyle !== 'none';
-        
-        if (hasBorderTop && !type) {
-          // Extract top border line as 3-segment breakable line without hiding the container element
+        const hasBorderBottom = computed.borderBottomWidth && parseFloat(computed.borderBottomWidth) > 0 && computed.borderBottomStyle !== 'none';
+
+        let hideBorderTop = false;
+        let hideBorderBottom = false;
+
+        if (hasBorderTop && rect.top >= -50 && rect.top <= maxY) {
           const borderHeight = Math.max(1, parseFloat(computed.borderTopWidth) || 1);
-          let lineColor = 'rgba(255, 255, 255, 0.2)';
+          let lineColor = 'rgba(255, 255, 255, 0.25)';
           if (computed.borderTopColor && computed.borderTopColor !== 'transparent' && computed.borderTopColor !== 'rgba(0, 0, 0, 0)') {
             lineColor = computed.borderTopColor;
           }
+          addLineSegments(rect.top, lineColor, borderHeight);
+          hideBorderTop = true;
+        }
 
-          const numSegments = 3;
-          const segmentWidth = rect.width / numSegments;
-          const lineY = rect.top;
+        if (hasBorderBottom && rect.bottom >= -50 && rect.bottom <= maxY) {
+          const borderHeight = Math.max(1, parseFloat(computed.borderBottomWidth) || 1);
+          let lineColor = 'rgba(255, 255, 255, 0.25)';
+          if (computed.borderBottomColor && computed.borderBottomColor !== 'transparent' && computed.borderBottomColor !== 'rgba(0, 0, 0, 0)') {
+            lineColor = computed.borderBottomColor;
+          }
+          addLineSegments(rect.bottom - borderHeight, lineColor, borderHeight);
+          hideBorderBottom = true;
+        }
 
-          for (let i = 0; i < numSegments; i++) {
-            const segLeft = rect.left + i * segmentWidth;
+        if (hideBorderTop || hideBorderBottom) {
+          hiddenOriginalsRef.current.push({
+            element,
+            originalOpacity: element.style.opacity,
+            originalVisibility: element.style.visibility,
+            originalPointerEvents: element.style.pointerEvents,
+            originalBorderTopColor: element.style.borderTopColor,
+            originalBorderBottomColor: element.style.borderBottomColor,
+          });
+
+          if (hideBorderTop) element.style.borderTopColor = 'transparent';
+          if (hideBorderBottom) element.style.borderBottomColor = 'transparent';
+        }
+
+        if (type && type !== 'line') {
+          // Opt-in chaos text or widget element
+          if (rect.top <= maxY && rect.bottom >= -50) {
+            hiddenOriginalsRef.current.push({
+              element,
+              originalOpacity: element.style.opacity,
+              originalVisibility: element.style.visibility,
+              originalPointerEvents: element.style.pointerEvents,
+              originalBorderTopColor: element.style.borderTopColor,
+              originalBorderBottomColor: element.style.borderBottomColor,
+            });
+
+            element.style.opacity = '0';
+            element.style.visibility = 'hidden';
+            element.style.pointerEvents = 'none';
+
+            const textContent = element.getAttribute('data-text') || element.textContent || '';
+
             const clone = document.createElement('div');
-            clone.className = 'chaos-line-segment select-none pointer-events-none z-[9998]';
+            clone.className = 'chaos-element-clone select-none pointer-events-none z-[9998]';
             clone.style.position = 'absolute';
-            clone.style.left = `${segLeft + scrollX}px`;
-            clone.style.top = `${lineY + scrollY}px`;
-            clone.style.width = `${segmentWidth}px`;
-            clone.style.height = `${borderHeight}px`;
+            clone.style.left = `${rect.left + scrollX}px`;
+            clone.style.top = `${rect.top + scrollY}px`;
+            clone.style.width = `${rect.width}px`;
+            clone.style.height = `${rect.height}px`;
             clone.style.margin = '0px';
             clone.style.padding = '0px';
-            clone.style.backgroundColor = lineColor;
+            clone.style.fontSize = computed.fontSize;
+            clone.style.fontFamily = computed.fontFamily;
+            clone.style.fontWeight = computed.fontWeight;
+            clone.style.fontStyle = computed.fontStyle;
+            clone.style.lineHeight = computed.lineHeight || '1.05';
+            clone.style.letterSpacing = computed.letterSpacing;
+            clone.style.textTransform = computed.textTransform;
+            clone.style.color = '#ffffff'; // Static white text for physical clones
+            clone.style.display = 'inline-flex';
+            clone.style.alignItems = 'center';
+            clone.style.justifyContent = 'flex-start';
+            clone.style.whiteSpace = 'nowrap';
             clone.style.transformOrigin = 'center center';
             clone.style.willChange = 'transform';
+            clone.textContent = textContent;
 
             chaosContainer.appendChild(clone);
-            const mockRect = new DOMRect(segLeft, lineY, segmentWidth, borderHeight);
-            createdClones.push({ clone, rect: mockRect, isLine: true });
+            createdClones.push({ clone, rect, isLine: false });
           }
-
-          hiddenOriginalsRef.current.push({
-            element,
-            originalOpacity: element.style.opacity,
-            originalVisibility: element.style.visibility,
-            originalPointerEvents: element.style.pointerEvents,
-            originalBorderTopColor: element.style.borderTopColor,
-            originalBorderBottomColor: element.style.borderBottomColor,
-          });
-
-          element.style.borderTopColor = 'transparent';
-        } else if (type) {
-          // Opt-in chaos text or widget element
-          hiddenOriginalsRef.current.push({
-            element,
-            originalOpacity: element.style.opacity,
-            originalVisibility: element.style.visibility,
-            originalPointerEvents: element.style.pointerEvents,
-            originalBorderTopColor: element.style.borderTopColor,
-            originalBorderBottomColor: element.style.borderBottomColor,
-          });
-
-          element.style.opacity = '0';
-          element.style.visibility = 'hidden';
-          element.style.pointerEvents = 'none';
-
-          const textContent = element.getAttribute('data-text') || element.textContent || '';
-
-          const clone = document.createElement('div');
-          clone.className = 'chaos-element-clone select-none pointer-events-none z-[9998]';
-          clone.style.position = 'absolute';
-          clone.style.left = `${rect.left + scrollX}px`;
-          clone.style.top = `${rect.top + scrollY}px`;
-          clone.style.width = `${rect.width}px`;
-          clone.style.height = `${rect.height}px`;
-          clone.style.margin = '0px';
-          clone.style.padding = '0px';
-          clone.style.fontSize = computed.fontSize;
-          clone.style.fontFamily = computed.fontFamily;
-          clone.style.fontWeight = computed.fontWeight;
-          clone.style.fontStyle = computed.fontStyle;
-          clone.style.lineHeight = computed.lineHeight || '1.05';
-          clone.style.letterSpacing = computed.letterSpacing;
-          clone.style.textTransform = computed.textTransform;
-          clone.style.color = '#ffffff'; // Static white text for physical clones
-          clone.style.display = 'inline-flex';
-          clone.style.alignItems = 'center';
-          clone.style.justifyContent = 'flex-start';
-          clone.style.whiteSpace = 'nowrap';
-          clone.style.transformOrigin = 'center center';
-          clone.style.willChange = 'transform';
-          clone.textContent = textContent;
-
-          chaosContainer.appendChild(clone);
-          createdClones.push({ clone, rect, isLine: false });
         }
       }
     });
@@ -367,13 +430,15 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     scrollY: number,
     width: number,
     height: number,
-    wallOptions: any
+    wallOptions: any,
+    bottomFactor: number = 1.3
   ) => {
     const wallThickness = 100;
+    const effectiveHeight = height * bottomFactor;
     const topWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY - wallThickness / 2, width * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
-    const bottomWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY + height + wallThickness / 2, width * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
-    const leftWall = Matter.Bodies.rectangle(scrollX - wallThickness / 2, scrollY + height / 2, wallThickness, height * 2, { isStatic: true, label: 'wall', ...wallOptions });
-    const rightWall = Matter.Bodies.rectangle(scrollX + width + wallThickness / 2, scrollY + height / 2, wallThickness, height * 2, { isStatic: true, label: 'wall', ...wallOptions });
+    const bottomWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY + effectiveHeight + wallThickness / 2, width * 2, wallThickness, { isStatic: true, label: 'wall', ...wallOptions });
+    const leftWall = Matter.Bodies.rectangle(scrollX - wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, label: 'wall', ...wallOptions });
+    const rightWall = Matter.Bodies.rectangle(scrollX + width + wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, label: 'wall', ...wallOptions });
 
     Matter.World.add(engine.world, [topWall, bottomWall, leftWall, rightWall]);
     return [topWall, bottomWall, leftWall, rightWall];
@@ -398,12 +463,23 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       const physicsHeight = isLine ? Math.max(40, rect.height) : Math.max(1, rect.height);
 
       const baseOptions = bodyOptionsFn(rect, isLine);
-      // Line segment bodies are dynamic with frictionAir for stable floating until hit
-      const bodyOptions = isLine ? { ...baseOptions, isStatic: false, frictionAir: 0.1 } : baseOptions;
+      // Line segment bodies are dynamic with low density, bounce, and low inertia so they easily flip/spin when struck
+      const bodyOptions = isLine
+        ? {
+            ...baseOptions,
+            isStatic: false,
+            frictionAir: 0.1,
+            density: 0.0001,
+            restitution: 0.6,
+          }
+        : baseOptions;
 
       const body = Matter.Bodies.rectangle(centerX, centerY, bodyWidth, physicsHeight, bodyOptions);
       if (isLine) {
         body.label = 'line';
+        if (Matter.Body && typeof Matter.Body.setInertia === 'function') {
+          Matter.Body.setInertia(body, body.inertia / 5);
+        }
       }
 
       Matter.World.add(engine.world, body);
@@ -554,8 +630,8 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       }
     };
 
-    // Animation Loop (Increased constant speed by 15%: 2.2815 * 1.15 = 2.623725)
-    const CONST_SPEED = 2.623725;
+    // Animation Loop (Speed reduced by 20%: 2.623725 * 0.8 = 2.09898)
+    const CONST_SPEED = 2.09898;
     let isIntroFinished = false;
 
     let currDozerX = spawnX;
@@ -1663,7 +1739,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
 
     document.body.style.cursor = 'default';
 
-    const { chaosContainer, createdClones, scrollX, scrollY, width, height } = setupChaosDOM();
+    const { chaosContainer, createdClones, scrollX, scrollY, width, height } = setupChaosDOM('plinko');
 
     // Physics Engine with standard Earth gravity
     const engine = Matter.Engine.create({
