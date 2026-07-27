@@ -133,7 +133,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
   // =========================================================================
   // 2. UNIFIED DOM SETUP & CLONING ENGINE (setupChaosDOM)
   // =========================================================================
-  const setupChaosDOM = (mode?: string) => {
+  const setupChaosDOM = () => {
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
     const width = window.innerWidth;
@@ -161,49 +161,6 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       isLine?: boolean;
     }
     const createdClones: CreatedClone[] = [];
-
-    // PLINKO MODE SPECIAL: Find "SELECTED WORK" subtitle and hide all elements below it
-    let selectedWorkBottomY: number | null = null;
-    if (mode === 'plinko') {
-      const headings = Array.from(document.querySelectorAll<HTMLElement>('h2, span, div'));
-      const selectedWorkHeading = headings.find((el) => {
-        const text = el.textContent?.trim().toUpperCase() || '';
-        return (text === 'SELECTED WORK' || (text.includes('SELECTED') && text.includes('WORK'))) && el.tagName === 'H2';
-      });
-
-      if (selectedWorkHeading) {
-        const h2Rect = selectedWorkHeading.getBoundingClientRect();
-        selectedWorkBottomY = h2Rect.bottom;
-      }
-
-      // Hide main sections below "SELECTED WORK"
-      const workSection = document.getElementById('work');
-      const sideProjectsSection = document.getElementById('side-projects');
-      const connectSection = document.getElementById('connect');
-
-      // The project list inside #work is all children after the header div
-      const workListContainer = workSection ? Array.from(workSection.children).slice(1) : [];
-
-      const elementsToHide = [
-        ...workListContainer,
-        sideProjectsSection,
-        connectSection,
-      ].filter((el): el is HTMLElement => el !== null);
-
-      elementsToHide.forEach((container) => {
-        hiddenOriginalsRef.current.push({
-          element: container,
-          originalOpacity: container.style.opacity,
-          originalVisibility: container.style.visibility,
-          originalPointerEvents: container.style.pointerEvents,
-          originalDisplay: container.style.display,
-        });
-
-        container.style.opacity = '0';
-        container.style.visibility = 'hidden';
-        container.style.pointerEvents = 'none';
-      });
-    }
 
     // Hide magnetic text containers
     const magneticContainers = Array.from(document.querySelectorAll<HTMLElement>('.magnetic-text-container'));
@@ -241,22 +198,6 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
 
       if (rect.width <= 0 || rect.height <= 0) return;
 
-      // In Plinko mode, skip creating clones/pegs for any elements below SELECTED WORK subtitle
-      if (mode === 'plinko' && selectedWorkBottomY !== null && rect.top >= selectedWorkBottomY - 5) {
-        hiddenOriginalsRef.current.push({
-          element,
-          originalOpacity: element.style.opacity,
-          originalVisibility: element.style.visibility,
-          originalPointerEvents: element.style.pointerEvents,
-          originalBorderTopColor: element.style.borderTopColor,
-          originalBorderBottomColor: element.style.borderBottomColor,
-        });
-        element.style.opacity = '0';
-        element.style.visibility = 'hidden';
-        element.style.pointerEvents = 'none';
-        return;
-      }
-
       const computed = window.getComputedStyle(element);
       const isExplicitLine = type === 'line' || isHr;
       const isThinLine = rect.height <= 8 && rect.width >= 20;
@@ -287,7 +228,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
         }
       };
 
-      const maxY = window.innerHeight * 1.20;
+      const maxY = window.innerHeight * 1.30;
 
       if (isExplicitLine || isThinLine) {
         // Line must be visible in or up to 30% below the viewport
@@ -1761,7 +1702,7 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
 
     document.body.style.cursor = 'default';
 
-    const { chaosContainer, createdClones, scrollX, scrollY, width, height } = setupChaosDOM('plinko');
+    const { chaosContainer, createdClones, scrollX, scrollY, width, height } = setupChaosDOM();
 
     // Physics Engine with standard Earth gravity
     const engine = Matter.Engine.create({
@@ -1769,14 +1710,37 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     });
     matterInstanceRef.current = { engine, Matter };
 
-    // Bounding walls (Top wall raised high so balls spawn above viewport and drop in freely)
+    // Collision categories for Plinko selective floor
+    const CATEGORY_DEFAULT = 0x0001;     // Outer walls & DOM element clones
+    const CATEGORY_BALL = 0x0002;        // Plinko balls
+    const CATEGORY_BALL_FLOOR = 0x0004;   // Viewport floor for Plinko balls
+
+    // Bounding walls (extended 35% below viewport so elements near bottom edge do not collide with wall and pop up)
+    const effectiveHeight = height * 1.35;
     const wallThickness = 100;
     const topWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY - 200, width * 2, wallThickness, { isStatic: true, restitution: 0.8, friction: 0.1 });
-    const bottomWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY + height + wallThickness / 2, width * 2, wallThickness, { isStatic: true, restitution: 0.8, friction: 0.1 });
-    const leftWall = Matter.Bodies.rectangle(scrollX - wallThickness / 2, scrollY + height / 2, wallThickness, height * 2, { isStatic: true, restitution: 0.8, friction: 0.1 });
-    const rightWall = Matter.Bodies.rectangle(scrollX + width + wallThickness / 2, scrollY + height / 2, wallThickness, height * 2, { isStatic: true, restitution: 0.8, friction: 0.1 });
+    const bottomWall = Matter.Bodies.rectangle(scrollX + width / 2, scrollY + effectiveHeight + wallThickness / 2, width * 2, wallThickness, { isStatic: true, restitution: 0.8, friction: 0.1 });
+    const leftWall = Matter.Bodies.rectangle(scrollX - wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, restitution: 0.8, friction: 0.1 });
+    const rightWall = Matter.Bodies.rectangle(scrollX + width + wallThickness / 2, scrollY + effectiveHeight / 2, wallThickness, effectiveHeight * 2, { isStatic: true, restitution: 0.8, friction: 0.1 });
 
-    Matter.World.add(engine.world, [topWall, bottomWall, leftWall, rightWall]);
+    // Selective floor wall at visible viewport bottom ONLY for Plinko balls
+    const viewportBallFloor = Matter.Bodies.rectangle(
+      scrollX + width / 2,
+      scrollY + height + wallThickness / 2,
+      width * 2,
+      wallThickness,
+      {
+        isStatic: true,
+        restitution: 0.8,
+        friction: 0.1,
+        collisionFilter: {
+          category: CATEGORY_BALL_FLOOR,
+          mask: CATEGORY_BALL, // ONLY collides with Plinko balls
+        },
+      }
+    );
+
+    Matter.World.add(engine.world, [topWall, bottomWall, leftWall, rightWall, viewportBallFloor]);
 
     // Create dynamic text bodies in suspension fluid (high air friction)
     const bindings = createBindingsFromClones(
@@ -1791,6 +1755,10 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
         friction: 0.2,
         frictionAir: 0.15, // Thick fluid friction
         restitution: 0.4,
+        collisionFilter: {
+          category: CATEGORY_DEFAULT,
+          mask: CATEGORY_DEFAULT | CATEGORY_BALL, // Collides with other DOM elements & Plinko balls, ignores CATEGORY_BALL_FLOOR
+        },
       })
     );
 
@@ -1806,10 +1774,10 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     let colorIdx = 0;
     let spawnInterval: number | null = null;
 
-    const radius = 30; // Doubled radius (30px radius = 60px diameter)
+    const radius = 30; // 30px radius = 60px diameter
 
     const spawnBall = () => {
-      if (ballCount >= 40) { // Increased drop limit to 40
+      if (ballCount >= 50) { // Increased drop limit to 50
         if (spawnInterval !== null) {
           clearInterval(spawnInterval);
           spawnInterval = null;
@@ -1817,7 +1785,10 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
         return;
       }
 
-      const spawnX = scrollX + Math.random() * (width - 120) + 60;
+      const spawnMargin = radius + 10;
+      const minX = scrollX + spawnMargin;
+      const maxX = Math.max(minX + 10, scrollX + width - spawnMargin);
+      const spawnX = minX + Math.random() * (maxX - minX);
       const spawnY = scrollY - 60;
 
       const color = PLINKO_COLORS[colorIdx % PLINKO_COLORS.length];
@@ -1840,6 +1811,10 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
         restitution: 0.8,
         friction: 0.1,
         frictionAir: 0.005,
+        collisionFilter: {
+          category: CATEGORY_BALL,
+          mask: CATEGORY_DEFAULT | CATEGORY_BALL | CATEGORY_BALL_FLOOR, // Collides with DOM elements, other balls, and viewport floor
+        },
       });
 
       Matter.World.add(engine.world, ballBody);
@@ -1847,9 +1822,9 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
       ballCount++;
     };
 
-    // Immediate initial ball drop, then every 300ms
+    // Immediate initial ball drop, then every 200ms
     spawnBall();
-    spawnInterval = window.setInterval(spawnBall, 300);
+    spawnInterval = window.setInterval(spawnBall, 200);
 
     // Native anti-gravity hover for text bodies (cancels global gravity until struck)
     const handleBeforeUpdate = () => {
@@ -1861,9 +1836,9 @@ export const ChaosEngine: React.FC<ChaosEngineProps> = ({ activeMode }) => {
     const handleCollision = (event: any) => {
       event.pairs.forEach((pair: any) => {
         const { bodyA, bodyB } = pair;
-        if (bodyA.isStatic && !bodyB.isStatic && bodyA !== topWall && bodyA !== bottomWall && bodyA !== leftWall && bodyA !== rightWall) {
+        if (bodyA.isStatic && !bodyB.isStatic && bodyA !== topWall && bodyA !== bottomWall && bodyA !== leftWall && bodyA !== rightWall && bodyA !== viewportBallFloor) {
           Matter.Body.setStatic(bodyA, false);
-        } else if (bodyB.isStatic && !bodyA.isStatic && bodyB !== topWall && bodyB !== bottomWall && bodyB !== leftWall && bodyB !== rightWall) {
+        } else if (bodyB.isStatic && !bodyA.isStatic && bodyB !== topWall && bodyB !== bottomWall && bodyB !== leftWall && bodyB !== rightWall && bodyB !== viewportBallFloor) {
           Matter.Body.setStatic(bodyB, false);
         }
       });
