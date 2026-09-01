@@ -182,40 +182,84 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
       return;
     }
 
-    const handleGlobalMouseMove = (e: MouseEvent) => {
+    let touchResetTimer: any = null;
+    let lastTouchTime = 0;
+
+    const clearResetTimer = () => {
+      if (touchResetTimer) {
+        clearTimeout(touchResetTimer);
+        touchResetTimer = null;
+      }
+    };
+
+    const resetToNeutral = () => {
+      clearResetTimer();
+      mouseX.set(-10000);
+      mouseY.set(-10000);
       isTouchMotion.set(0);
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
+    };
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      // Ignore synthesized mousemove events dispatched by mobile browsers following touch events
+      if (Date.now() - lastTouchTime < 1500) {
+        return;
+      }
+
+      const isCoarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+      if (isCoarse) {
+        // If on mobile/coarse pointer, ensure any mouse interaction is temporary and reverts
+        clearResetTimer();
+        isTouchMotion.set(1);
+        mouseX.set(e.clientX);
+        mouseY.set(e.clientY);
+        touchResetTimer = setTimeout(resetToNeutral, 600);
+      } else {
+        clearResetTimer();
+        isTouchMotion.set(0);
+        mouseX.set(e.clientX);
+        mouseY.set(e.clientY);
+      }
     };
 
     const handleMouseLeaveWindow = () => {
-      mouseX.set(-10000);
-      mouseY.set(-10000);
+      resetToNeutral();
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      lastTouchTime = Date.now();
+      clearResetTimer();
+
       if (e.touches.length > 0) {
         isTouchMotion.set(1);
         const touch = e.touches[0];
         mouseX.set(touch.clientX);
         mouseY.set(touch.clientY);
+
+        // Guarantee the displacement effect is strictly temporary (auto-springs back after 700ms even if held)
+        touchResetTimer = setTimeout(resetToNeutral, 700);
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      lastTouchTime = Date.now();
+      clearResetTimer();
+
       if (e.touches.length > 0) {
         isTouchMotion.set(1);
         const touch = e.touches[0];
         mouseX.set(touch.clientX);
         mouseY.set(touch.clientY);
+
+        // Maintain temporary bound
+        touchResetTimer = setTimeout(resetToNeutral, 700);
       }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (e.touches.length === 0) {
-        mouseX.set(-10000);
-        mouseY.set(-10000);
-      }
+    const handleTouchEnd = () => {
+      lastTouchTime = Date.now();
+      clearResetTimer();
+      // On tap release, smoothly return letters back over the colorful layer
+      touchResetTimer = setTimeout(resetToNeutral, 180);
     };
 
     window.addEventListener('mousemove', handleGlobalMouseMove);
@@ -227,6 +271,7 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
     window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
     return () => {
+      clearResetTimer();
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeaveWindow);
       window.removeEventListener('touchstart', handleTouchStart);

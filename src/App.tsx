@@ -19,33 +19,31 @@ import { Project } from './types';
 import MagneticText from './components/MagneticText';
 import MagneticImage3D from './components/MagneticImage3D';
 import ProjectRow from './components/ProjectRow';
-import { SplitFlapCountdown } from './components/SplitFlapCountdown';
+import { SplitFlapCountdown, getNextAvailabilityDate, formatAvailabilityDate } from './components/SplitFlapCountdown';
 import AutoplayVideo from './components/AutoplayVideo';
 import { ChaosWidget, ChaosMode } from './components/ChaosWidget';
 import { ChaosEngine } from './components/ChaosEngine';
+import { MobileGyroBackground } from './components/MobileGyroBackground';
 import { motion, AnimatePresence } from 'motion/react';
 
-const AVAILABILITY_DATE = "2026-09-02T09:00:00";
-
-const formatAvailabilityDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const day = date.getDate();
-  const month = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-
-  const getOrdinalSuffix = (n: number) => {
-    if (n >= 11 && n <= 13) return 'TH';
-    switch (n % 10) {
-      case 1: return 'ST';
-      case 2: return 'ND';
-      case 3: return 'RD';
-      default: return 'TH';
-    }
-  };
-
-  return `${month} ${day}${getOrdinalSuffix(day)}`;
-};
-
 export default function App() {
+  // Rolling availability target date state & auto-advancing sync
+  const [availabilityTarget, setAvailabilityTarget] = useState<Date>(() => getNextAvailabilityDate());
+
+  useEffect(() => {
+    const syncTarget = () => {
+      const freshTarget = getNextAvailabilityDate();
+      setAvailabilityTarget(prev => {
+        if (prev.getTime() !== freshTarget.getTime()) {
+          return freshTarget;
+        }
+        return prev;
+      });
+    };
+    const interval = setInterval(syncTarget, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Navigation & Scroll states
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
@@ -623,6 +621,9 @@ export default function App() {
         }}
       />
 
+      {/* Mobile-Only Ambient Gyroscope Tilt Physics Background Shapes */}
+      <MobileGyroBackground />
+
       {/* Persistent Progressive Blur Overlay (All Devices - Ultra Subtle - Pure Optical Blur) */}
       <div className="fixed top-0 inset-x-0 h-[30px] md:h-[60px] z-40 pointer-events-none select-none">
         {/* Layered blur stops for pure optical depth of field ONLY - NO COLOR TINT */}
@@ -729,9 +730,9 @@ export default function App() {
             {/* Grouped dynamic text and SplitFlapCountdown (Desktop only) */}
             <div className="hidden md:flex items-center justify-end gap-2 md:gap-3">
               <div className="text-right font-mono text-xs tracking-widest text-neutral-400 uppercase leading-normal select-none">
-                AVAILABLE FOR LONG-TERM PROJECTS STARTING <span className="text-white font-medium">{formatAvailabilityDate(AVAILABILITY_DATE)}</span>
+                AVAILABLE FOR LONG-TERM PROJECTS STARTING <span className="text-white font-medium">{formatAvailabilityDate(availabilityTarget)}</span>
               </div>
-              <SplitFlapCountdown availabilityDateTime={AVAILABILITY_DATE} />
+              <SplitFlapCountdown targetDate={availabilityTarget} onCycleExpire={setAvailabilityTarget} />
             </div>
 
             {/* Mobile hamburger Toggle */}
@@ -830,7 +831,7 @@ export default function App() {
       {/* -------------------------------------------------------------------------
           MAIN ARCHITECTURAL VIEWPORTS
           ------------------------------------------------------------------------- */}
-      <main className="flex-grow pt-12 md:pt-16">
+      <main className="flex-grow pt-12 md:pt-16 relative z-10">
 
         {/* 1. Hero Introduction */}
         <section 
@@ -1368,7 +1369,7 @@ export default function App() {
           MODERN MINIMAL HUMBLE FOOTER
           ------------------------------------------------------------------------- */}
       <footer 
-        className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 py-12 border-t flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-[0.62rem] uppercase tracking-widest text-stone-500 mt-16"
+        className="max-w-screen-2xl mx-auto px-6 md:px-12 2xl:px-24 py-12 border-t flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-[0.62rem] uppercase tracking-widest text-stone-500 mt-16 relative z-10"
         style={{ 
           borderColor: isLightActive ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'
         }}

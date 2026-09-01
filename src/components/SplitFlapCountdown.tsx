@@ -111,25 +111,79 @@ const SplitFlapCard: React.FC<SplitFlapCardProps> = ({ value, label }) => {
 };
 
 interface SplitFlapCountdownProps {
-  availabilityDateTime?: string;
+  targetDate?: Date;
+  onCycleExpire?: (newTargetDate: Date) => void;
 }
 
+// Anchor date: September 8, 2026 at 09:00:00 local time
+// Month in Date constructor is 0-indexed: 8 is September
+export const ANCHOR_DATE = new Date(2026, 8, 8, 9, 0, 0);
+export const CYCLE_MS = 14 * 24 * 60 * 60 * 1000; // 1,209,600,000 ms (14-day cycle)
+
+/**
+ * Calculates the current active target availability date based on the September 8, 2026 anchor.
+ * If now < anchorDate, returns the anchor date.
+ * If now >= targetDate, calculates elapsed 14-day cycles and advances by 14-day increments until targetDate > now.
+ */
+export const getNextAvailabilityDate = (now: Date = new Date()): Date => {
+  const nowMs = now.getTime();
+  const anchorMs = ANCHOR_DATE.getTime();
+  if (nowMs < anchorMs) {
+    return new Date(anchorMs);
+  }
+  const cyclesPassed = Math.floor((nowMs - anchorMs) / CYCLE_MS) + 1;
+  return new Date(anchorMs + cyclesPassed * CYCLE_MS);
+};
+
+/**
+ * Dynamically formats a Date into uppercase month abbreviation + day with ordinal suffix (e.g., "SEP 8TH", "SEP 22ND", "OCT 6TH")
+ */
+export const formatAvailabilityDate = (date: Date): string => {
+  const day = date.getDate();
+  const month = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+
+  const getOrdinalSuffix = (n: number) => {
+    if (n >= 11 && n <= 13) return 'TH';
+    switch (n % 10) {
+      case 1: return 'ST';
+      case 2: return 'ND';
+      case 3: return 'RD';
+      default: return 'TH';
+    }
+  };
+
+  return `${month} ${day}${getOrdinalSuffix(day)}`;
+};
+
 export const SplitFlapCountdown: React.FC<SplitFlapCountdownProps> = ({
-  availabilityDateTime = '2026-09-15T09:00:00'
+  targetDate: propTargetDate,
+  onCycleExpire,
 }) => {
   const [days, setDays] = useState(0);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [isShuffling, setIsShuffling] = useState(true);
 
-  const targetDate = new Date(availabilityDateTime);
+  // Helper to get active target date
+  const getActiveTarget = () => {
+    const now = new Date();
+    if (propTargetDate && propTargetDate.getTime() > now.getTime()) {
+      return propTargetDate;
+    }
+    return getNextAvailabilityDate(now);
+  };
 
   // Calculate standard time remaining values
   const getTargetValues = () => {
     const now = new Date();
-    const differenceMs = targetDate.getTime() - now.getTime();
+    const activeTarget = getActiveTarget();
+    let differenceMs = activeTarget.getTime() - now.getTime();
     if (differenceMs <= 0) {
-      return { d: 0, h: 0, m: 0 };
+      const nextTarget = getNextAvailabilityDate(now);
+      if (onCycleExpire) {
+        onCycleExpire(nextTarget);
+      }
+      differenceMs = Math.max(0, nextTarget.getTime() - now.getTime());
     }
     const totalSeconds = Math.floor(differenceMs / 1000);
     const d = Math.floor(totalSeconds / (3600 * 24));
@@ -181,7 +235,7 @@ export const SplitFlapCountdown: React.FC<SplitFlapCountdownProps> = ({
     }, 30); // 30ms for that amazing energetic mechanical chatter
 
     return () => clearInterval(shuffleInterval);
-  }, [availabilityDateTime, isShuffling]);
+  }, [propTargetDate, isShuffling]);
 
   // Smooth handoff from shuffling to active countdown
   useEffect(() => {
@@ -208,7 +262,7 @@ export const SplitFlapCountdown: React.FC<SplitFlapCountdownProps> = ({
     const intervalId = setInterval(calculateTimeRemaining, 1000);
 
     return () => clearInterval(intervalId);
-  }, [isShuffling, availabilityDateTime]);
+  }, [isShuffling, propTargetDate]);
 
   return (
     <div className="flex items-center space-x-2.5 overflow-visible py-2">
