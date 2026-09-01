@@ -115,13 +115,13 @@ interface SplitFlapCountdownProps {
   onCycleExpire?: (newTargetDate: Date) => void;
 }
 
-// Anchor date: September 8, 2026 at 09:00:00 local time
+// Anchor date: September 7, 2026 at 09:00:00 local time
 // Month in Date constructor is 0-indexed: 8 is September
-export const ANCHOR_DATE = new Date(2026, 8, 8, 9, 0, 0);
+export const ANCHOR_DATE = new Date(2026, 8, 7, 9, 0, 0);
 export const CYCLE_MS = 14 * 24 * 60 * 60 * 1000; // 1,209,600,000 ms (14-day cycle)
 
 /**
- * Calculates the current active target availability date based on the September 8, 2026 anchor.
+ * Calculates the current active target availability date based on the September 7, 2026 anchor.
  * If now < anchorDate, returns the anchor date.
  * If now >= targetDate, calculates elapsed 14-day cycles and advances by 14-day increments until targetDate > now.
  */
@@ -136,7 +136,7 @@ export const getNextAvailabilityDate = (now: Date = new Date()): Date => {
 };
 
 /**
- * Dynamically formats a Date into uppercase month abbreviation + day with ordinal suffix (e.g., "SEP 8TH", "SEP 22ND", "OCT 6TH")
+ * Dynamically formats a Date into uppercase month abbreviation + day with ordinal suffix (e.g., "SEP 7TH", "SEP 21ST", "OCT 5TH")
  */
 export const formatAvailabilityDate = (date: Date): string => {
   const day = date.getDate();
