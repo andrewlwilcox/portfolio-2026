@@ -287,18 +287,28 @@ export const MobileGyroBackground: React.FC = () => {
           }
         };
 
+        // 1. IMPLEMENT A LIGHTWEIGHT DEBOUNCE (200ms):
+        // Prevents collision penetration and violent shape launches during mobile address bar transitions
+        let resizeTimeout: any = null;
+        const debouncedResize = () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+            handleResize();
+          }, 200);
+        };
+
+        // 2. ATTACH THE DEBOUNCED LISTENER:
         const viewport = window.visualViewport || window;
-        viewport.addEventListener('resize', handleResize);
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', handleResize);
+        viewport.addEventListener('resize', debouncedResize);
+        window.addEventListener('resize', debouncedResize);
+        window.addEventListener('orientationchange', debouncedResize);
         if (window.visualViewport) {
-          window.visualViewport.addEventListener('scroll', handleResize);
+          window.visualViewport.addEventListener('scroll', debouncedResize);
         }
 
-        // FORCE INITIAL ALIGNMENT:
-        // Crucially, call this handleResize() function manually once immediately on mount.
-        // Do not wait for a window resize event to place the floor. The floor must be
-        // perfectly placed using the dynamic visual viewport height before the lucky charms drop.
+        // 3. FORCE INITIAL ALIGNMENT:
+        // Crucially, call raw handleResize() immediately inside useEffect on mount to set
+        // the initial perfect floor placement before the debounce takes over for future scrolls.
         handleResize();
         requestAnimationFrame(() => handleResize());
         setTimeout(handleResize, 50);
@@ -320,13 +330,15 @@ export const MobileGyroBackground: React.FC = () => {
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
+        // 4. CLEANUP: Clear debounce timeout and remove listeners
         cleanupListeners = () => {
+          clearTimeout(resizeTimeout);
           window.removeEventListener('deviceorientation', handleOrientation);
-          viewport.removeEventListener('resize', handleResize);
-          window.removeEventListener('resize', handleResize);
-          window.removeEventListener('orientationchange', handleResize);
+          viewport.removeEventListener('resize', debouncedResize);
+          window.removeEventListener('resize', debouncedResize);
+          window.removeEventListener('orientationchange', debouncedResize);
           if (window.visualViewport) {
-            window.visualViewport.removeEventListener('scroll', handleResize);
+            window.visualViewport.removeEventListener('scroll', debouncedResize);
           }
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
