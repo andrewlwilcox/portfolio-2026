@@ -282,14 +282,10 @@ export const MobileGyroBackground: React.FC = () => {
           }
 
           // DELTA TRANSLATION ON RESIZE:
-          // If the screen shrank (deltaY < 0), meaning the floor moved UP,
-          // loop through all the lucky charms (shapes) and translate them by the same delta
-          // so they ride the floor up without colliding:
-          if (deltaY < 0 && shapes && shapes.length > 0) {
+          // Translate all shapes universally so they track the moving floor whether the screen grows or shrinks
+          if (deltaY !== 0 && shapes && shapes.length > 0) {
             shapes.forEach((shape) => {
-              // Move the shape up by the exact same amount the floor moved
               MatterModule.Body.translate(shape, { x: 0, y: deltaY });
-              // Kill any residual collision velocity to prevent bouncing
               MatterModule.Body.setVelocity(shape, { x: shape.velocity.x, y: 0 });
             });
           }
@@ -438,11 +434,12 @@ export const MobileGyroBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 select-none block md:hidden"
+      className="fixed bottom-0 left-0 right-0 pointer-events-none z-0 select-none block md:hidden"
       style={{
         position: 'fixed',
-        top: 0,
+        bottom: 0,
         left: 0,
+        right: 0,
         pointerEvents: 'none',
         zIndex: 0,
       }}
