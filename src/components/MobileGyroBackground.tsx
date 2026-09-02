@@ -51,8 +51,15 @@ export const MobileGyroBackground: React.FC = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let width = window.innerWidth;
-        let height = window.innerHeight;
+        const getViewportDimensions = () => {
+          const canvas = canvasRef.current;
+          const w = canvas?.clientWidth || window.visualViewport?.width || window.innerWidth;
+          // canvas.clientHeight adheres directly to 100svh in CSS
+          const h = canvas?.clientHeight || window.visualViewport?.height || window.innerHeight;
+          return { width: w, height: h };
+        };
+
+        const { width, height } = getViewportDimensions();
 
         // DPR CAPPING: Max 2 for crisp retina rendering without GPU waste
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -69,29 +76,38 @@ export const MobileGyroBackground: React.FC = () => {
         engine.world.gravity.scale = 0.001;
 
         // 4 Static Boundary Walls just outside the edges of the mobile viewport
-        const wallThickness = 60;
+        const wallThickness = 80;
+        let groundBody: any = null;
+        let topWall: any = null;
+        let leftWall: any = null;
+        let rightWall: any = null;
+
         const createWalls = (w: number, h: number) => {
-          const top = Matter.Bodies.rectangle(w / 2, -wallThickness / 2, w * 2, wallThickness, {
+          topWall = Matter.Bodies.rectangle(w / 2, -wallThickness / 2, w * 3, wallThickness, {
             isStatic: true,
             restitution: 0.4,
             friction: 0.1,
+            label: 'topWall',
           });
-          const bottom = Matter.Bodies.rectangle(w / 2, h + wallThickness / 2, w * 2, wallThickness, {
+          groundBody = Matter.Bodies.rectangle(w / 2, h + wallThickness / 2, w * 3, wallThickness, {
             isStatic: true,
             restitution: 0.4,
             friction: 0.2,
+            label: 'groundBody',
           });
-          const left = Matter.Bodies.rectangle(-wallThickness / 2, h / 2, wallThickness, h * 2, {
+          leftWall = Matter.Bodies.rectangle(-wallThickness / 2, h / 2, wallThickness, h * 3, {
             isStatic: true,
             restitution: 0.4,
             friction: 0.1,
+            label: 'leftWall',
           });
-          const right = Matter.Bodies.rectangle(w + wallThickness / 2, h / 2, wallThickness, h * 2, {
+          rightWall = Matter.Bodies.rectangle(w + wallThickness / 2, h / 2, wallThickness, h * 3, {
             isStatic: true,
             restitution: 0.4,
             friction: 0.1,
+            label: 'rightWall',
           });
-          return [top, bottom, left, right];
+          return [topWall, groundBody, leftWall, rightWall];
         };
 
         walls = createWalls(width, height);
@@ -207,10 +223,9 @@ export const MobileGyroBackground: React.FC = () => {
 
         // RESIZE & ORIENTATION CHANGE HANDLING
         const handleResize = () => {
-          if (!canvasRef.current || !engine) return;
-          const newWidth = window.innerWidth;
-          const newHeight = window.innerHeight;
-          isMobile = newWidth < 768;
+          if (!canvasRef.current || !engine || !MatterModule) return;
+          const { width: newWidth, height: newHeight } = getViewportDimensions();
+          isMobile = window.innerWidth < 768;
 
           if (!isMobile) {
             // Clear canvas if resized to desktop
@@ -232,23 +247,60 @@ export const MobileGyroBackground: React.FC = () => {
           currentCtx.setTransform(1, 0, 0, 1, 0, 0);
           currentCtx.scale(newDpr, newDpr);
 
-          // Update walls
-          if (walls.length > 0) {
-            Matter.World.remove(engine.world, walls);
+          // Explicitly reposition the static floor body so it always hugs the exact bottom of the new canvas height
+          if (groundBody) {
+            MatterModule.Body.setPosition(groundBody, {
+              x: newWidth / 2,
+              y: newHeight + (wallThickness / 2),
+            });
           }
-          walls = createWalls(newWidth, newHeight);
-          Matter.World.add(engine.world, walls);
+          if (topWall) {
+            MatterModule.Body.setPosition(topWall, {
+              x: newWidth / 2,
+              y: -wallThickness / 2,
+            });
+          }
+          if (leftWall) {
+            MatterModule.Body.setPosition(leftWall, {
+              x: -wallThickness / 2,
+              y: newHeight / 2,
+            });
+          }
+          if (rightWall) {
+            MatterModule.Body.setPosition(rightWall, {
+              x: newWidth + (wallThickness / 2),
+              y: newHeight / 2,
+            });
+          }
 
-          // Update shapes
-          if (shapes.length > 0) {
-            Matter.World.remove(engine.world, shapes);
+          // If any shape is below the visible bottom (e.g. if the viewport shrank),
+          // gently nudge it back up into the visible play area
+          if (shapes && shapes.length > 0) {
+            shapes.forEach((body) => {
+              if (body.position.y > newHeight - 15) {
+                MatterModule.Body.setPosition(body, {
+                  x: Math.max(25, Math.min(newWidth - 25, body.position.x)),
+                  y: newHeight - 35,
+                });
+                MatterModule.Body.setVelocity(body, { x: body.velocity.x, y: -0.5 });
+              }
+            });
           }
-          shapes = createShapes(newWidth, newHeight);
-          Matter.World.add(engine.world, shapes);
         };
 
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', handleResize);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', handleResize);
+        }
+
+        // FORCE INITIAL ALIGNMENT:
+        // Crucially, call this handleResize() function manually once immediately on mount.
+        // Do not wait for a window resize event to place the floor. The floor must be
+        // perfectly placed using the svh/dvh client height before the lucky charms drop.
+        handleResize();
+        requestAnimationFrame(() => handleResize());
+        setTimeout(handleResize, 50);
 
         // 4. VISIBILITY PAUSE: Pause render loop when tab/screen is hidden to save battery
         const handleVisibilityChange = () => {
@@ -271,6 +323,9 @@ export const MobileGyroBackground: React.FC = () => {
           window.removeEventListener('deviceorientation', handleOrientation);
           window.removeEventListener('resize', handleResize);
           window.removeEventListener('orientationchange', handleResize);
+          if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', handleResize);
+          }
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
 
@@ -376,13 +431,14 @@ export const MobileGyroBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-screen h-screen pointer-events-none z-0 select-none block md:hidden"
+      className="fixed inset-0 w-screen h-[100svh] max-h-[100dvh] pointer-events-none z-0 select-none block md:hidden"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100svh',
+        maxHeight: '100dvh',
         pointerEvents: 'none',
         zIndex: 0,
       }}
