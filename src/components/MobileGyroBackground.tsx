@@ -51,20 +51,19 @@ export const MobileGyroBackground: React.FC = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const getViewportDimensions = () => {
-          const w = window.visualViewport ? window.visualViewport.width : (canvasRef.current?.clientWidth || window.innerWidth);
-          // Strictly adhere to the dynamic visual viewport height
-          const h = window.visualViewport ? window.visualViewport.height : (canvasRef.current?.clientHeight || window.innerHeight);
-          return { width: w, height: h };
-        };
-
-        const { width, height } = getViewportDimensions();
+        // Decouple canvas from dynamic CSS heights - use absolute JS pixels
+        const width = window.innerWidth;
+        const height = window.innerHeight;
         let prevHeight = height;
 
         // DPR CAPPING: Max 2 for crisp retina rendering without GPU waste
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = width * dpr;
         canvas.height = height * dpr;
+
+        // CRITICAL: Lock CSS dimensions to match exactly so the browser cannot stretch/squish it
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
         ctx.scale(dpr, dpr);
 
         // Matter Engine initialization
@@ -224,7 +223,8 @@ export const MobileGyroBackground: React.FC = () => {
         // RESIZE & ORIENTATION CHANGE HANDLING (Delta Translation Strategy)
         const handleResize = () => {
           if (!canvasRef.current || !engine || !MatterModule) return;
-          const { width: newWidth, height: newHeight } = getViewportDimensions();
+          const newWidth = window.innerWidth;
+          const newHeight = window.innerHeight; // Use innerHeight for the true visible area
           const deltaY = newHeight - prevHeight;
           isMobile = window.innerWidth < 768;
 
@@ -244,8 +244,14 @@ export const MobileGyroBackground: React.FC = () => {
           if (!currentCtx) return;
 
           const newDpr = Math.min(window.devicePixelRatio || 1, 2);
+          // Update HTML pixel buffer
           currentCanvas.width = newWidth * newDpr;
           currentCanvas.height = newHeight * newDpr;
+
+          // CRITICAL: Lock CSS dimensions to match exactly so the browser cannot stretch/squish it
+          currentCanvas.style.width = `${newWidth}px`;
+          currentCanvas.style.height = `${newHeight}px`;
+
           currentCtx.setTransform(1, 0, 0, 1, 0, 0);
           currentCtx.scale(newDpr, newDpr);
 
@@ -432,13 +438,11 @@ export const MobileGyroBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-screen h-[100dvh] pointer-events-none z-0 select-none block md:hidden"
+      className="fixed inset-0 pointer-events-none z-0 select-none block md:hidden"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100vw',
-        height: '100dvh',
         pointerEvents: 'none',
         zIndex: 0,
       }}
