@@ -59,6 +59,7 @@ export const MobileGyroBackground: React.FC = () => {
         };
 
         const { width, height } = getViewportDimensions();
+        let prevHeight = height;
 
         // DPR CAPPING: Max 2 for crisp retina rendering without GPU waste
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -220,10 +221,11 @@ export const MobileGyroBackground: React.FC = () => {
         // 4. UNCONDITIONAL SENSOR ATTACHMENT (Direct on mount, no tap/click gating)
         window.addEventListener('deviceorientation', handleOrientation, { passive: true });
 
-        // RESIZE & ORIENTATION CHANGE HANDLING
+        // RESIZE & ORIENTATION CHANGE HANDLING (Delta Translation Strategy)
         const handleResize = () => {
           if (!canvasRef.current || !engine || !MatterModule) return;
           const { width: newWidth, height: newHeight } = getViewportDimensions();
+          const deltaY = newHeight - prevHeight;
           isMobile = window.innerWidth < 768;
 
           if (!isMobile) {
@@ -233,6 +235,7 @@ export const MobileGyroBackground: React.FC = () => {
             if (currentCtx) {
               currentCtx.clearRect(0, 0, currentCanvas.width, currentCanvas.height);
             }
+            prevHeight = newHeight;
             return;
           }
 
@@ -272,48 +275,36 @@ export const MobileGyroBackground: React.FC = () => {
             });
           }
 
-          // If any shape is below the visible bottom (e.g. if the viewport shrank),
-          // gently nudge it back up into the visible play area
-          if (shapes && shapes.length > 0) {
-            shapes.forEach((body) => {
-              if (body.position.y > newHeight - 15) {
-                MatterModule.Body.setPosition(body, {
-                  x: Math.max(25, Math.min(newWidth - 25, body.position.x)),
-                  y: newHeight - 35,
-                });
-                MatterModule.Body.setVelocity(body, { x: body.velocity.x, y: -0.5 });
-              }
+          // DELTA TRANSLATION ON RESIZE:
+          // If the screen shrank (deltaY < 0), meaning the floor moved UP,
+          // loop through all the lucky charms (shapes) and translate them by the same delta
+          // so they ride the floor up without colliding:
+          if (deltaY < 0 && shapes && shapes.length > 0) {
+            shapes.forEach((shape) => {
+              // Move the shape up by the exact same amount the floor moved
+              MatterModule.Body.translate(shape, { x: 0, y: deltaY });
+              // Kill any residual collision velocity to prevent bouncing
+              MatterModule.Body.setVelocity(shape, { x: shape.velocity.x, y: 0 });
             });
           }
+
+          // Update prevHeight at the end of resize
+          prevHeight = newHeight;
         };
 
-        // 1. IMPLEMENT A LIGHTWEIGHT DEBOUNCE (200ms):
-        // Prevents collision penetration and violent shape launches during mobile address bar transitions
-        let resizeTimeout: any = null;
-        const debouncedResize = () => {
-          clearTimeout(resizeTimeout);
-          resizeTimeout = setTimeout(() => {
-            handleResize();
-          }, 200);
-        };
-
-        // 2. ATTACH THE DEBOUNCED LISTENER:
+        // Attach native resize listeners directly without debounce
         const viewport = window.visualViewport || window;
-        viewport.addEventListener('resize', debouncedResize);
-        window.addEventListener('resize', debouncedResize);
-        window.addEventListener('orientationchange', debouncedResize);
-        if (window.visualViewport) {
-          window.visualViewport.addEventListener('scroll', debouncedResize);
-        }
+        viewport.addEventListener('resize', handleResize);
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
 
-        // 3. FORCE INITIAL ALIGNMENT:
-        // Crucially, call raw handleResize() immediately inside useEffect on mount to set
-        // the initial perfect floor placement before the debounce takes over for future scrolls.
+        // FORCE INITIAL ALIGNMENT:
+        // Call handleResize() immediately inside useEffect on mount to set initial floor placement
         handleResize();
         requestAnimationFrame(() => handleResize());
         setTimeout(handleResize, 50);
 
-        // 4. VISIBILITY PAUSE: Pause render loop when tab/screen is hidden to save battery
+        // VISIBILITY PAUSE: Pause render loop when tab/screen is hidden to save battery
         const handleVisibilityChange = () => {
           if (document.hidden) {
             if (animFrameId !== null) {
@@ -330,16 +321,12 @@ export const MobileGyroBackground: React.FC = () => {
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        // 4. CLEANUP: Clear debounce timeout and remove listeners
+        // CLEANUP: Remove listeners
         cleanupListeners = () => {
-          clearTimeout(resizeTimeout);
           window.removeEventListener('deviceorientation', handleOrientation);
-          viewport.removeEventListener('resize', debouncedResize);
-          window.removeEventListener('resize', debouncedResize);
-          window.removeEventListener('orientationchange', debouncedResize);
-          if (window.visualViewport) {
-            window.visualViewport.removeEventListener('scroll', debouncedResize);
-          }
+          viewport.removeEventListener('resize', handleResize);
+          window.removeEventListener('resize', handleResize);
+          window.removeEventListener('orientationchange', handleResize);
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
 
