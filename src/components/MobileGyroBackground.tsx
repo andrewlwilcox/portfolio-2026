@@ -52,10 +52,9 @@ export const MobileGyroBackground: React.FC = () => {
         if (!ctx) return;
 
         const getViewportDimensions = () => {
-          const canvas = canvasRef.current;
-          const w = canvas?.clientWidth || window.visualViewport?.width || window.innerWidth;
-          // canvas.clientHeight adheres directly to 100svh in CSS
-          const h = canvas?.clientHeight || window.visualViewport?.height || window.innerHeight;
+          const w = window.visualViewport ? window.visualViewport.width : (canvasRef.current?.clientWidth || window.innerWidth);
+          // Strictly adhere to the dynamic visual viewport height
+          const h = window.visualViewport ? window.visualViewport.height : (canvasRef.current?.clientHeight || window.innerHeight);
           return { width: w, height: h };
         };
 
@@ -288,16 +287,18 @@ export const MobileGyroBackground: React.FC = () => {
           }
         };
 
+        const viewport = window.visualViewport || window;
+        viewport.addEventListener('resize', handleResize);
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', handleResize);
         if (window.visualViewport) {
-          window.visualViewport.addEventListener('resize', handleResize);
+          window.visualViewport.addEventListener('scroll', handleResize);
         }
 
         // FORCE INITIAL ALIGNMENT:
         // Crucially, call this handleResize() function manually once immediately on mount.
         // Do not wait for a window resize event to place the floor. The floor must be
-        // perfectly placed using the svh/dvh client height before the lucky charms drop.
+        // perfectly placed using the dynamic visual viewport height before the lucky charms drop.
         handleResize();
         requestAnimationFrame(() => handleResize());
         setTimeout(handleResize, 50);
@@ -321,10 +322,11 @@ export const MobileGyroBackground: React.FC = () => {
 
         cleanupListeners = () => {
           window.removeEventListener('deviceorientation', handleOrientation);
+          viewport.removeEventListener('resize', handleResize);
           window.removeEventListener('resize', handleResize);
           window.removeEventListener('orientationchange', handleResize);
           if (window.visualViewport) {
-            window.visualViewport.removeEventListener('resize', handleResize);
+            window.visualViewport.removeEventListener('scroll', handleResize);
           }
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
@@ -431,14 +433,13 @@ export const MobileGyroBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-screen h-[100svh] max-h-[100dvh] pointer-events-none z-0 select-none block md:hidden"
+      className="fixed inset-0 w-screen h-[100dvh] pointer-events-none z-0 select-none block md:hidden"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100svh',
-        maxHeight: '100dvh',
+        height: '100dvh',
         pointerEvents: 'none',
         zIndex: 0,
       }}
