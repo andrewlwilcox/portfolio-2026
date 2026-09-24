@@ -1070,8 +1070,8 @@ export default function App() {
                       role: "Creative Director",
                       company: "OpenAI",
                       location: "SAN FRANCISCO, CA",
-                      years: "OCT 2025 — PRESENT",
-                      desc: "FOCUSED ON BRAND AND PRODUCT LAUNCH WORK STREAMS. MOVING FAST AND EXPERIMENTING."
+                      years: "OCT 2025 — AUG 2026",
+                      desc: "COLLABORATED WITH TOP-TIER WRITERS, DESIGNERS, STRATEGISTS AND PRODUCERS TO PROMOTE THE LAUNCHES OF SORA AND CHATGPT IMAGES, AND CELEBRATED THE COMPANY'S 10-YEAR ANNIVERSARY."
                     },
                     {
                       role: "Creative Director",

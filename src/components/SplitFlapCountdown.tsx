@@ -115,21 +115,20 @@ interface SplitFlapCountdownProps {
   onCycleExpire?: (newTargetDate: Date) => void;
 }
 
-// Anchor date: September 7, 2026 at 09:00:00 local time
+// Anchor date: September 21, 2026 at 09:00:00 local time (weekly Monday reset)
 // Month in Date constructor is 0-indexed: 8 is September
-export const ANCHOR_DATE = new Date(2026, 8, 7, 9, 0, 0);
-export const CYCLE_MS = 14 * 24 * 60 * 60 * 1000; // 1,209,600,000 ms (14-day cycle)
+export const ANCHOR_DATE = new Date(2026, 8, 21, 9, 0, 0);
+export const CYCLE_MS = 7 * 24 * 60 * 60 * 1000; // 604,800,000 ms (7-day weekly cycle)
 
 /**
- * Calculates the current active target availability date based on the September 7, 2026 anchor.
- * If now < anchorDate, returns the anchor date.
- * If now >= targetDate, calculates elapsed 14-day cycles and advances by 14-day increments until targetDate > now.
+ * Calculates the current active target availability date based on the September 21, 2026 anchor.
+ * Resets every week on Monday at 09:00 local time, advancing to the following Monday (7 days later).
  */
 export const getNextAvailabilityDate = (now: Date = new Date()): Date => {
   const nowMs = now.getTime();
   const anchorMs = ANCHOR_DATE.getTime();
   if (nowMs < anchorMs) {
-    return new Date(anchorMs);
+    return new Date(anchorMs + CYCLE_MS);
   }
   const cyclesPassed = Math.floor((nowMs - anchorMs) / CYCLE_MS) + 1;
   return new Date(anchorMs + cyclesPassed * CYCLE_MS);
