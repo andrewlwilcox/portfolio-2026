@@ -178,7 +178,7 @@ function MagneticLetterTop({
       const isTouch = isTouchMotion.get() === 1 || window.matchMedia('(pointer: coarse)').matches;
 
       if (isTouch) {
-        // MOBILE / TOUCH REPULSION (50% reduced displacement)
+        // MOBILE / TOUCH REPULSION (+20% increase from 50% baseline -> 0.30)
         const repulsionX = letterCenterX - mX;
         const repulsionY = letterCenterY - mY;
         const distance = Math.hypot(repulsionX, repulsionY);
@@ -187,7 +187,7 @@ function MagneticLetterTop({
         if (distance < threshold) {
           const ratio = 1 - (distance / threshold);
           const falloffRatio = ratio * ratio;
-          const pushFactor = 0.25;
+          const pushFactor = 0.30;
           x.set(repulsionX * pushFactor * falloffRatio);
           y.set(repulsionY * pushFactor * falloffRatio);
         } else {
@@ -195,7 +195,7 @@ function MagneticLetterTop({
           y.set(0);
         }
       } else {
-        // DESKTOP MOUSE INTERACTION (50% reduced displacement)
+        // DESKTOP MOUSE INTERACTION (+20% increase from 50% baseline -> 0.27)
         const distanceX = mX - letterCenterX;
         const distanceY = mY - letterCenterY;
         const distance = Math.hypot(distanceX, distanceY);
@@ -204,7 +204,7 @@ function MagneticLetterTop({
         if (distance < threshold) {
           const ratio = 1 - (distance / threshold);
           const falloffRatio = ratio * ratio;
-          const pullFactor = 0.225;
+          const pullFactor = 0.27;
           x.set(distanceX * pullFactor * falloffRatio);
           y.set(distanceY * pullFactor * falloffRatio);
         } else {
@@ -555,10 +555,10 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
         const d = Math.max(dSelf, dPrev, dNext);
         charDists[i] = d;
 
-        // Target vapor bloom localized around parted letters (calibrated for 50% pull amplitude)
-        const targetVapor = d > 0.3 ? Math.min(1, (d - 0.3) / 3.75) : 0;
+        // Target vapor bloom localized around parted letters (+20% tuned sensitivity & presence)
+        const targetVapor = d > 0.25 ? Math.min(1, (d - 0.25) / 2.6) : 0;
         const currVapor = vaporLevels[i] || 0;
-        const rate = targetVapor > currVapor ? 0.22 : 0.14;
+        const rate = targetVapor > currVapor ? 0.24 : 0.14;
         const nextVapor = currVapor + (targetVapor - currVapor) * rate;
         vaporLevels[i] = nextVapor < 0.003 ? 0 : nextVapor;
 
@@ -663,36 +663,37 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
 
       let hasMist = false;
       // Scale vapor drift and stroke width proportionally on smaller mobile viewports
-      const mistScale = Math.min(1, Math.max(0.5, textH / 95));
+      const mistScale = Math.min(1, Math.max(0.55, textH / 95));
       for (let i = 0; i < chars.length; i++) {
         const vLevel = vaporLevels[i];
         if (vLevel <= 0.005) continue;
         hasMist = true;
 
         const ch = chars[i];
-        // Subtle 1:00 upward & rightward vapor drift (50% reduced spread, scaled for desktop & mobile)
+        // 1:00 upward & rightward vapor drift (+20% boost from reduced setting)
         const wisp1 = Math.sin(phase * 0.95 + i * 0.85);
         const wisp2 = Math.cos(phase * 1.35 - i * 1.15);
-        const driftX = (1.2 + 0.9 * wisp1) * vLevel * mistScale;
-        const driftY = (-2.4 - 1.8 * (0.5 + 0.5 * wisp2)) * vLevel * mistScale;
+        const driftX = (1.55 + 1.15 * wisp1) * vLevel * mistScale;
+        const driftY = (-3.0 - 2.25 * (0.5 + 0.5 * wisp2)) * vLevel * mistScale;
 
-        // Pass 1: Tight contour aura around the parted letter
-        mistCtx.globalAlpha = vLevel * 0.44;
-        mistCtx.lineWidth = 1.6 * vLevel * mistScale;
+        // Pass 1: Inner contour aura around the parted letter
+        mistCtx.globalAlpha = vLevel * 0.58;
+        mistCtx.lineWidth = 2.2 * vLevel * mistScale;
         mistCtx.strokeText(ch.char, ch.x, ch.baselineY);
         mistCtx.fillText(ch.char, ch.x, ch.baselineY);
 
-        // Pass 2: Subtle 1:00 upward-rightward vapor wisp
-        mistCtx.globalAlpha = vLevel * 0.34;
-        mistCtx.lineWidth = 2.6 * vLevel * mistScale;
+        // Pass 2: 1:00 upward-rightward vapor wisp
+        mistCtx.globalAlpha = vLevel * 0.45;
+        mistCtx.lineWidth = 3.5 * vLevel * mistScale;
         mistCtx.strokeText(ch.char, ch.x + driftX, ch.baselineY + driftY);
+        mistCtx.fillText(ch.char, ch.x + driftX, ch.baselineY + driftY);
 
-        // Pass 3: Delicate outer feather
-        mistCtx.globalAlpha = vLevel * 0.18;
-        mistCtx.lineWidth = 3.6 * vLevel * mistScale;
+        // Pass 3: Soft outer feather
+        mistCtx.globalAlpha = vLevel * 0.25;
+        mistCtx.lineWidth = 4.8 * vLevel * mistScale;
         mistCtx.strokeText(
           ch.char,
-          ch.x + driftX * 1.35 - wisp2 * 0.6 * mistScale,
+          ch.x + driftX * 1.35 - wisp2 * 0.75 * mistScale,
           ch.baselineY + driftY * 1.3
         );
       }
@@ -771,8 +772,8 @@ export default function MagneticText({ text, bgColor = '#ffffff' }: MagneticText
           top: `-${CANVAS_PAD}px`,
           width: canvasBox.width ? `${canvasBox.width}px` : '100%',
           height: canvasBox.height ? `${canvasBox.height}px` : '100%',
-          filter: 'blur(4px) saturate(1.3) brightness(1.05)',
-          opacity: isUnderneathHidden ? 0 : 0.52,
+          filter: 'blur(5px) saturate(1.4) brightness(1.12)',
+          opacity: isUnderneathHidden ? 0 : 0.72,
           visibility: isUnderneathHidden ? 'hidden' : 'visible',
           zIndex: 1,
         }}
